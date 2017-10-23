@@ -1,0 +1,529 @@
+<?xml version="1.0"?>
+<users>
+
+    <user>
+        <first_name>
+            <!-- Intentionally blank -->
+        </first_name>
+        <last_name>
+            <!-- Intentionally blank -->
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            news
+        </login>
+        <email>
+            news@mercer.edu
+        </email>
+        <display_name>
+            News@Mercer
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Dave
+        </first_name>
+        <last_name>
+            Beyer
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            beyer_wd
+        </login>
+        <email>
+            beyer_wd@mercer.edu
+        </email>
+        <display_name>
+            Dave Beyer
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Larry
+        </first_name>
+        <last_name>
+            Brumley
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            brumley_ld
+        </login>
+        <email>
+            brumley_ld@mercer.edu
+        </email>
+        <display_name>
+            Larry Brumley
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Jenny
+        </first_name>
+        <last_name>
+            Butkus
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            butkus_j
+        </login>
+        <email>
+            butkus_j@mercer.edu
+        </email>
+        <display_name>
+            Jenny Butkus
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Richard
+        </first_name>
+        <last_name>
+            Cameron
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            cameron_rl
+        </login>
+        <email>
+            cameron_rl@mercer.edu
+        </email>
+        <display_name>
+            Richard Cameron
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Denise
+        </first_name>
+        <last_name>
+            Cook
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            cook_d
+        </login>
+        <email>
+            cook_d@mercer.edu
+        </email>
+        <display_name>
+            Denise Cook
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Steven
+        </first_name>
+        <last_name>
+            Ericson
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            ericson_sp
+        </login>
+        <email>
+            ericson_sp@mercer.edu
+        </email>
+        <display_name>
+            Steven Ericson
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Elizabeth
+        </first_name>
+        <last_name>
+            Flader
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            flader_e
+        </login>
+        <email>
+            flader_e@mercer.edu
+        </email>
+        <display_name>
+            Elizabeth Flader
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Nancy
+        </first_name>
+        <last_name>
+            Fullbright
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            fullbright_n
+        </login>
+        <email>
+            fullbright_n@mercer.edu
+        </email>
+        <display_name>
+            Nancy Fullbright
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Wes
+        </first_name>
+        <last_name>
+            Griffith
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            griffith_w
+        </login>
+        <email>
+            griffith_w@mercer.edu
+        </email>
+        <display_name>
+            Wes Griffith
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            David
+        </first_name>
+        <last_name>
+            Hefner
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            hefner_dn
+        </login>
+        <email>
+            hefner_dn@mercer.edu
+        </email>
+        <display_name>
+            David Hefner
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Cindy
+        </first_name>
+        <last_name>
+            Hill
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            hill_c
+        </login>
+        <email>
+            hill_c@mercer.edu
+        </email>
+        <display_name>
+            Cindy Hill
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Brett
+        </first_name>
+        <last_name>
+            Jarrett
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            jarrett_b
+        </login>
+        <email>
+            jarrett_b@mercer.edu
+        </email>
+        <display_name>
+            Brett Jarrett
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Roban
+        </first_name>
+        <last_name>
+            Johnson
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            johnson_r
+        </login>
+        <email>
+            johnson_r@mercer.edu
+        </email>
+        <display_name>
+            Roban Johnson
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Randy
+        </first_name>
+        <last_name>
+            Jones
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            jones_r3
+        </login>
+        <email>
+            jones_r3@mercer.edu
+        </email>
+        <display_name>
+            Randy Jones
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Joel
+        </first_name>
+        <last_name>
+            Lamp
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            lamp_j
+        </login>
+        <email>
+            lamp_j@mercer.edu
+        </email>
+        <display_name>
+            Joel Lamp
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Judith
+        </first_name>
+        <last_name>
+            Lunsford
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            lunsford_j
+        </login>
+        <email>
+            lunsford_j@mercer.edu
+        </email>
+        <display_name>
+            Judith Lunsford
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Lindsay
+        </first_name>
+        <last_name>
+            Moss
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            moss_lm
+        </login>
+        <email>
+            moss_lm@mercer.edu
+        </email>
+        <display_name>
+            Lindsay M. Moss
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Sonal
+        </first_name>
+        <last_name>
+            Patel
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            patel_sd
+        </login>
+        <email>
+            patel_sd@mercer.edu
+        </email>
+        <display_name>
+            Sonal Patel
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Andy
+        </first_name>
+        <last_name>
+            Peters
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            peters_a
+        </login>
+        <email>
+            peters_a@mercer.edu
+        </email>
+        <display_name>
+            Andy Peters
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Billie
+        </first_name>
+        <last_name>
+            Rampley
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            rampley_bb
+        </login>
+        <email>
+            rampley_bb@mercer.edu
+        </email>
+        <display_name>
+            Billie Rampley
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Dan
+        </first_name>
+        <last_name>
+            Recupero
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            recupero_d
+        </login>
+        <email>
+            recupero_d@mercer.edu
+        </email>
+        <display_name>
+            Dan Recupero
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Anna
+        </first_name>
+        <last_name>
+            Sandison
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            sandison_aw
+        </login>
+        <email>
+            sandison_aw@mercer.edu
+        </email>
+        <display_name>
+            Anna Sandison
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Mark
+        </first_name>
+        <last_name>
+            Vanderhoek
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            vanderhoek_m
+        </login>
+        <email>
+            vanderhoek_m@mercer.edu
+        </email>
+        <display_name>
+            Mark Vanderhoek
+        </display_name>
+    </user>
+
+    <user>
+        <first_name>
+            Lance
+        </first_name>
+        <last_name>
+            Wallace
+        </last_name>
+        <role>
+            Subscriber
+        </role>
+        <login>
+            wallace_l
+        </login>
+        <email>
+            wallace_l@mercer.edu
+        </email>
+        <display_name>
+            Lance Wallace
+        </display_name>
+    </user>
+
+</users>
