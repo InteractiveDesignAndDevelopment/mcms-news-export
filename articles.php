@@ -16,53 +16,51 @@ use \ForceUTF8\Encoding;
 class Articles
 {
 
-    private $serverName = 'bubbleyum,2136';
+//    private $serverName = 'bubbleyum,2136';
+	private $serverName = 'localhost';
     private $databaseName = 'ede';
 
-    /* Functions */
+    /* Functions: Public */
 
-    function get ()
+	function get ()
+	{
+
+		/* Connect using Windows Authentication. */
+		$conn = sqlsrv_connect( $this->serverName, array( 'Database'=>$this->databaseName) );
+
+		if ($conn === false)
+		{
+			echo 'Unable to connect.</br>';
+			die( print_r( sqlsrv_errors(), true ) );
+		}
+
+		$stmt = sqlsrv_query( $conn, $this->sql() );
+
+		if ($stmt === false)
+		{
+			echo 'Error in executing query.</br>';
+			die( print_r( sqlsrv_errors(),true ) );
+		}
+
+		$arr = $this->articles_stmt_to_grouped_arr($stmt);
+
+//        print_r( $arr );
+
+		$arr = $this->grouped_arr_to_importable_arr($arr);
+
+//        print_r( $arr );
+
+		/* Free statement and connection resources. */
+		sqlsrv_free_stmt($stmt);
+		sqlsrv_close($conn);
+
+		return $arr;
+	}
+
+    /* Functions: Private */
+
+    private function articles_stmt_to_grouped_arr($stmt)
     {
-
-        /* Connect using Windows Authentication. */
-        $conn = sqlsrv_connect( $this->serverName, array( 'Database'=>$this->databaseName) );
-
-        if ($conn === false)
-        {
-            echo 'Unable to connect.</br>';
-            echo '<pre>';
-            print_r( sqlsrv_errors(), true );
-            echo '</pre>';
-            die();
-        }
-
-        $stmt = sqlsrv_query( $conn, $this->sql() );
-
-        if ($stmt === false)
-        {
-            echo 'Error in executing query.</br>';
-            echo '<pre>';
-            print_r( sqlsrv_errors(),true );
-            echo '</pre>';
-            die();
-        }
-
-        $arr = $this->articles_stmt_to_grouped_arr($stmt);
-
-//        print_r( $arr );
-
-        $arr = $this->grouped_arr_to_importable_arr($arr);
-
-//        print_r( $arr );
-
-        /* Free statement and connection resources. */
-        sqlsrv_free_stmt($stmt);
-        sqlsrv_close($conn);
-
-        return $arr;
-    }
-
-    private function articles_stmt_to_grouped_arr($stmt) {
         $arr = array();
 
         while ($row = sqlsrv_fetch_array($stmt))
@@ -134,108 +132,132 @@ class Articles
         return $arr;
     }
 
-    private function extract_date($date, $name, $path)
-    {
-        $parsed_date  = date_parse($date);
-        preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
-        preg_match('/^(\d+)/i', $name, $name_matches);
+	private function clean_author ($text)
+	{
+		$text = str_replace(',',' ', $text);
+
+		$text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i',      ' ', $text);
+		$text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
+		$text = preg_replace('/event contacts?\s*:?/i',                     ' ', $text);
+		$text = preg_replace('/media contacts?\s*:?/i',                     ' ', $text);
+		$text = preg_replace('/media advisorys?\s*:?/i',                    ' ', $text);
+		$text = preg_replace('/registration contacts?\s*:?/i',              ' ', $text);
+		$text = preg_replace('/session contacts?\s*:?/i',                   ' ', $text);
+		$text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i',                     ' ', $text);
+		$text = preg_replace('/contact\s*:?/i',                             ' ', $text);
+		$text = preg_replace('/ticket\s+sales?:?/i',                        ' ', $text);
+		$text = preg_replace('/or\s*$/i',                                   ' ', $text);
+
+		$text = preg_replace('/\s+/',' ', $text);
+
+		$text = trim($text);
+
+		return $text;
+	}
+
+	private function extract_date($date, $name, $path)
+	{
+		$parsed_date  = date_parse($date);
+		preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
+		preg_match('/^(\d+)/i', $name, $name_matches);
 
 //        echo '<pre>';
 //        print_r($parsed_date);
 //        echo '</pre>';
 
-        // Year
-        if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year']) )
-        {
-            $year = $parsed_date['year'];
-        }
-        else if ( isset($path_matches[1]) && 4 == strlen($path_matches[1]) )
-        {
-            $year = $path_matches[1];
-        }
-        else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-        {
-            $year  = substr($name_matches[1], 0, 2);
-            if ($year < 0)
-            {
-                $year = "20$year";
-            }
-            else
-            {
-                $year = "19$year";
-            }
-        }
-        else
-        {
-            $year = '1900';
-        }
+		// Year
+		if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year']) )
+		{
+			$year = $parsed_date['year'];
+		}
+		else if ( isset($path_matches[1]) && 4 == strlen($path_matches[1]) )
+		{
+			$year = $path_matches[1];
+		}
+		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+		{
+			$year  = substr($name_matches[1], 0, 2);
+			if ($year < 0)
+			{
+				$year = "20$year";
+			}
+			else
+			{
+				$year = "19$year";
+			}
+		}
+		else
+		{
+			$year = '1900';
+		}
 
-        // Month
-        if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month']) )
-        {
-            $month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
-        }
-        else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-        {
-            $month = substr($name_matches[1], 2, 2);
-        }
-        else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
-        {
-            $month = substr($name_matches[1], 0, 2);
-        }
-        else if ( isset($name_matches[1]) && 2 == strlen($name_matches[1]) )
-        {
-            $month = $name_matches[1];
-        }
-        else
-        {
-            $month = '01';
-        }
+		// Month
+		if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month']) )
+		{
+			$month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
+		}
+		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+		{
+			$month = substr($name_matches[1], 2, 2);
+		}
+		else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
+		{
+			$month = substr($name_matches[1], 0, 2);
+		}
+		else if ( isset($name_matches[1]) && 2 == strlen($name_matches[1]) )
+		{
+			$month = $name_matches[1];
+		}
+		else
+		{
+			$month = '01';
+		}
 
-        // Day
-        if ( $parsed_date && 0 == $parsed_date['error_count']  && 0 < strlen($parsed_date['day']) )
-        {
-            $day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
-        }
-        else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-        {
-            $day = substr($name_matches[1], 4, 2);
-        }
-        else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
-        {
-            $day = substr($name_matches[1], 2, 2);
-        }
-        else
-        {
-            $day = '01';
-        }
+		// Day
+		if ( $parsed_date && 0 == $parsed_date['error_count']  && 0 < strlen($parsed_date['day']) )
+		{
+			$day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
+		}
+		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+		{
+			$day = substr($name_matches[1], 4, 2);
+		}
+		else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
+		{
+			$day = substr($name_matches[1], 2, 2);
+		}
+		else
+		{
+			$day = '01';
+		}
 
-        // Last chance to deal with errors
-        if ( $year < 1900 || 2013 < $year )
-        {
-            $year = '1900';
-        }
+		// Last chance to deal with errors
+		if ( $year < 1900 || 2013 < $year )
+		{
+			$year = '1900';
+		}
 
-        if ( 12 < $month )
-        {
-            if ( $day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year) ) {
-                $temp  = $month;
-                $month = $day;
-                $day   = $temp;
-            } else {
-                $month = '01';
-            }
-        }
+		if ( 12 < $month )
+		{
+			if ( $day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year) ) {
+				$temp  = $month;
+				$month = $day;
+				$day   = $temp;
+			} else {
+				$month = '01';
+			}
+		}
 
-        if ( cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day )
-        {
-            $day = '01';
-        }
+		if ( cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day )
+		{
+			$day = '01';
+		}
 
-        return "$year-$month-$day";
-    }
+		return "$year-$month-$day";
+	}
 
-    private function extract_excerpt(string $html_fragment) {
+    private function extract_excerpt(string $html_fragment)
+    {
         $doc = new DOMDocument;
         @$doc->loadHTML($html_fragment);
 
@@ -261,28 +283,6 @@ class Articles
         }
 
         return '';
-    }
-
-    private function clean_author ($text) {
-        $text = str_replace(',',' ', $text);
-
-        $text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i',      ' ', $text);
-        $text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
-        $text = preg_replace('/event contacts?\s*:?/i',                     ' ', $text);
-        $text = preg_replace('/media contacts?\s*:?/i',                     ' ', $text);
-        $text = preg_replace('/media advisorys?\s*:?/i',                    ' ', $text);
-        $text = preg_replace('/registration contacts?\s*:?/i',              ' ', $text);
-        $text = preg_replace('/session contacts?\s*:?/i',                   ' ', $text);
-        $text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i',                     ' ', $text);
-        $text = preg_replace('/contact\s*:?/i',                             ' ', $text);
-        $text = preg_replace('/ticket\s+sales?:?/i',                        ' ', $text);
-        $text = preg_replace('/or\s*$/i',                                   ' ', $text);
-
-        $text = preg_replace('/\s+/',' ', $text);
-
-        $text = trim($text);
-
-        return $text;
     }
 
     private function extract_author ($text) {
@@ -444,8 +444,18 @@ class Articles
             $importable_article_html = $this->html_fragment_clean($article['placeholders']['PH_article']['html']);
             $importable_headline_text = $this->html_fragment_to_text($article['placeholders']['PH_headline']['text']);
 
+            echo '<div>';
+            echo $importable_headline_text;
+	        for( $i = 0; $i <= strlen($importable_headline_text); $i++ ) {
+		        $char = substr( $importable_headline_text, $i, 1 );
+		        $ord = ord($char);
+		        echo "<div><code>${char}</code> = ${ord}</div>";
+		        // $char contains the current character, so do your processing here
+	        }
+            echo '</div>';
+
             $importable_arr                      = array();
-            $importable_arr['categories']        = 'News';
+            $importable_arr['categories']        = 'General';
             $importable_arr['content']           = trim($importable_article_html);
             $importable_arr['content_raw']       = trim($article['placeholders']['PH_article']['html']);
             $importable_arr['excerpt']           = trim($this->extract_excerpt($importable_article_html));
@@ -545,7 +555,7 @@ class Articles
         return $html_fragment;
     }
 
-    function html_fragment_clean_tags (string $html_fragment) {
+    private function html_fragment_clean_tags (string $html_fragment) {
         if (0 == strlen(trim($html_fragment)))
         {
             return '';
@@ -553,7 +563,7 @@ class Articles
         return $html_fragment = strip_tags($html_fragment, '<a><b><em><i><p><strong>');
     }
 
-    function html_fragment_clean(string $html_fragment)
+    private function html_fragment_clean(string $html_fragment)
     {
         if (0 === strlen(trim($html_fragment)))
         {
@@ -608,13 +618,25 @@ class Articles
              FROM postings
         LEFT JOIN placeholders
                ON postings.guid = placeholders.posting_guid
-            WHERE path LIKE '/news/%'
---                   AND postings.path LIKE '/news/articles/2003/%'
+--             WHERE postings.[path] LIKE '/news/%'
 --               AND postings.guid IN
 --                   (
---                     '3B5BD7F3-6D0A-4527-8FA1-E2E71FA9539C',
---                     '26081125-1A01-4163-BAF3-7ED47FA36812'
+--                       SELECT TOP 100 postings.guid
+--                         FROM postings
+--                        WHERE postings.[path] LIKE '/news/%'
+--                     ORDER BY NEWID()
 --                   )
+            WHERE postings.guid IN (
+                      -- Title ends in capital A circumflex
+               	      '14151E1C-7C07-4FA7-B79C-12869D0BC177',
+               	      '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
+               	      -- Title has lowercase a circumflex Euro TM
+               	      'EA277333-9279-4048-A8F4-DD480986B4A3',
+               	      '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
+               	      'A0926DFA-79A7-47C2-BA74-513B1E36D205',
+               	      -- Misplaced interrogation point
+               	      '4EAB1913-530A-4CF7-8621-83C0403AC0C8'
+                  )
          ORDER BY posting_name ASC
 SQL;
     }
