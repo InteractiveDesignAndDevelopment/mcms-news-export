@@ -110,7 +110,7 @@ class Articles
             // Posting::Placeholders::Placeholder::HTML
             if (!isset($arr[$posting_guid]['placeholders'][$placeholder_name]['html']))
             {
-                $val =  Encoding::toUTF8($row['placeholder_html']);
+                $val = Encoding::toUTF8($row['placeholder_html']);
                 $arr[$posting_guid]['placeholders'][$placeholder_name]['html'] = $val;
             }
 

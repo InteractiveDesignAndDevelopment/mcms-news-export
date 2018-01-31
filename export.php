@@ -24,13 +24,13 @@ foreach ($articles->get() as $guid => $article)
 
     // Name
     $xmlElement = $xmlDom->createElement('title');
-    $xmlText = $xmlDom->createTextNode(utf8_encode($article['title']));
+    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['title'])));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Content
     $xmlElement = $xmlDom->createElement('content');
-    $xmlText = $xmlDom->createTextNode(utf8_encode($article['content']));
+    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['content'])));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
