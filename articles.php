@@ -16,46 +16,46 @@ use \ForceUTF8\Encoding;
 class Articles
 {
 
-//    private $serverName = 'bubbleyum,2136';
-	private $serverName = 'localhost';
+    // private $serverName = 'bubbleyum,2136';
+    private $serverName = 'localhost';
     private $databaseName = 'ede';
 
     /* Functions: Public */
 
-	function get ()
-	{
+  function get ()
+  {
 
-		/* Connect using Windows Authentication. */
-		$conn = sqlsrv_connect( $this->serverName, array( 'Database'=>$this->databaseName) );
+    /* Connect using Windows Authentication. */
+    $conn = sqlsrv_connect( $this->serverName, array( 'Database'=>$this->databaseName, 'CharacterSet' => 'UTF-8' ) );
 
-		if ($conn === false)
-		{
-			echo 'Unable to connect.</br>';
-			die( print_r( sqlsrv_errors(), true ) );
-		}
+    if ($conn === false)
+    {
+      echo 'Unable to connect.</br>';
+      die( print_r( sqlsrv_errors(), true ) );
+    }
 
-		$stmt = sqlsrv_query( $conn, $this->sql() );
+    $stmt = sqlsrv_query( $conn, $this->sql() );
 
-		if ($stmt === false)
-		{
-			echo 'Error in executing query.</br>';
-			die( print_r( sqlsrv_errors(),true ) );
-		}
+    if ($stmt === false)
+    {
+      echo 'Error in executing query.</br>';
+      die( print_r( sqlsrv_errors(),true ) );
+    }
 
-		$arr = $this->articles_stmt_to_grouped_arr($stmt);
-
-//        print_r( $arr );
-
-		$arr = $this->grouped_arr_to_importable_arr($arr);
+    $arr = $this->articles_stmt_to_grouped_arr($stmt);
 
 //        print_r( $arr );
 
-		/* Free statement and connection resources. */
-		sqlsrv_free_stmt($stmt);
-		sqlsrv_close($conn);
+    $arr = $this->grouped_arr_to_importable_arr($arr);
 
-		return $arr;
-	}
+//        print_r( $arr );
+
+    /* Free statement and connection resources. */
+    sqlsrv_free_stmt($stmt);
+    sqlsrv_close($conn);
+
+    return $arr;
+  }
 
     /* Functions: Private */
 
@@ -112,6 +112,7 @@ class Articles
             {
                 $val = Encoding::toUTF8($row['placeholder_html']);
                 $arr[$posting_guid]['placeholders'][$placeholder_name]['html'] = $val;
+                // $arr[$posting_guid]['placeholders'][$placeholder_name]['html'] = $row['placeholder_html'];
             }
 
             // Posting::Placeholders::Placeholder::Text
@@ -132,134 +133,137 @@ class Articles
         return $arr;
     }
 
-	private function clean_author ($text)
-	{
-		$text = str_replace(',',' ', $text);
+  private function clean_author ($text)
+  {
+    $text = str_replace(',',' ', $text);
 
-		$text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i',      ' ', $text);
-		$text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
-		$text = preg_replace('/event contacts?\s*:?/i',                     ' ', $text);
-		$text = preg_replace('/media contacts?\s*:?/i',                     ' ', $text);
-		$text = preg_replace('/media advisorys?\s*:?/i',                    ' ', $text);
-		$text = preg_replace('/registration contacts?\s*:?/i',              ' ', $text);
-		$text = preg_replace('/session contacts?\s*:?/i',                   ' ', $text);
-		$text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i',                     ' ', $text);
-		$text = preg_replace('/contact\s*:?/i',                             ' ', $text);
-		$text = preg_replace('/ticket\s+sales?:?/i',                        ' ', $text);
-		$text = preg_replace('/or\s*$/i',                                   ' ', $text);
+    $text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i',      ' ', $text);
+    $text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
+    $text = preg_replace('/event contacts?\s*:?/i',                     ' ', $text);
+    $text = preg_replace('/media contacts?\s*:?/i',                     ' ', $text);
+    $text = preg_replace('/media advisorys?\s*:?/i',                    ' ', $text);
+    $text = preg_replace('/registration contacts?\s*:?/i',              ' ', $text);
+    $text = preg_replace('/session contacts?\s*:?/i',                   ' ', $text);
+    $text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i',                     ' ', $text);
+    $text = preg_replace('/contact\s*:?/i',                             ' ', $text);
+    $text = preg_replace('/ticket\s+sales?:?/i',                        ' ', $text);
+    $text = preg_replace('/or\s*$/i',                                   ' ', $text);
 
-		$text = preg_replace('/\s+/',' ', $text);
+    $text = preg_replace('/\s+/',' ', $text);
 
-		$text = trim($text);
+    $text = trim($text);
 
-		return $text;
-	}
+    return $text;
+  }
 
-	private function extract_date($date, $name, $path)
-	{
-		$parsed_date  = date_parse($date);
-		preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
-		preg_match('/^(\d+)/i', $name, $name_matches);
+  private function extract_date($date, $name, $path)
+  {
+    $parsed_date  = date_parse($date);
+    preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
+    preg_match('/^(\d+)/i', $name, $name_matches);
 
 //        echo '<pre>';
 //        print_r($parsed_date);
 //        echo '</pre>';
 
-		// Year
-		if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year']) )
-		{
-			$year = $parsed_date['year'];
-		}
-		else if ( isset($path_matches[1]) && 4 == strlen($path_matches[1]) )
-		{
-			$year = $path_matches[1];
-		}
-		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-		{
-			$year  = substr($name_matches[1], 0, 2);
-			if ($year < 0)
-			{
-				$year = "20$year";
-			}
-			else
-			{
-				$year = "19$year";
-			}
-		}
-		else
-		{
-			$year = '1900';
-		}
+    // Year
+    if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year']) )
+    {
+      $year = $parsed_date['year'];
+    }
+    else if ( isset($path_matches[1]) && 4 == strlen($path_matches[1]) )
+    {
+      $year = $path_matches[1];
+    }
+    else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+    {
+      $year  = substr($name_matches[1], 0, 2);
+      if ($year < 0)
+      {
+        $year = "20$year";
+      }
+      else
+      {
+        $year = "19$year";
+      }
+    }
+    else
+    {
+      $year = '1900';
+    }
 
-		// Month
-		if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month']) )
-		{
-			$month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
-		}
-		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-		{
-			$month = substr($name_matches[1], 2, 2);
-		}
-		else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
-		{
-			$month = substr($name_matches[1], 0, 2);
-		}
-		else if ( isset($name_matches[1]) && 2 == strlen($name_matches[1]) )
-		{
-			$month = $name_matches[1];
-		}
-		else
-		{
-			$month = '01';
-		}
+    // Month
+    if ( $parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month']) )
+    {
+      $month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
+    }
+    else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+    {
+      $month = substr($name_matches[1], 2, 2);
+    }
+    else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
+    {
+      $month = substr($name_matches[1], 0, 2);
+    }
+    else if ( isset($name_matches[1]) && 2 == strlen($name_matches[1]) )
+    {
+      $month = $name_matches[1];
+    }
+    else
+    {
+      $month = '01';
+    }
 
-		// Day
-		if ( $parsed_date && 0 == $parsed_date['error_count']  && 0 < strlen($parsed_date['day']) )
-		{
-			$day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
-		}
-		else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
-		{
-			$day = substr($name_matches[1], 4, 2);
-		}
-		else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
-		{
-			$day = substr($name_matches[1], 2, 2);
-		}
-		else
-		{
-			$day = '01';
-		}
+    // Day
+    if ( $parsed_date && 0 == $parsed_date['error_count']  && 0 < strlen($parsed_date['day']) )
+    {
+      $day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
+    }
+    else if ( isset($name_matches[1]) && 6 == strlen($name_matches[1]) )
+    {
+      $day = substr($name_matches[1], 4, 2);
+    }
+    else if ( isset($name_matches[1]) && 4 == strlen($name_matches[1]) )
+    {
+      $day = substr($name_matches[1], 2, 2);
+    }
+    else
+    {
+      $day = '01';
+    }
 
-		// Last chance to deal with errors
-		if ( $year < 1900 || 2013 < $year )
-		{
-			$year = '1900';
-		}
+    // Last chance to deal with errors
+    if ( $year < 1900 || 2013 < $year )
+    {
+      $year = '1900';
+    }
 
-		if ( 12 < $month )
-		{
-			if ( $day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year) ) {
-				$temp  = $month;
-				$month = $day;
-				$day   = $temp;
-			} else {
-				$month = '01';
-			}
-		}
+    if ( 12 < $month )
+    {
+      if ( $day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year) ) {
+        $temp  = $month;
+        $month = $day;
+        $day   = $temp;
+      } else {
+        $month = '01';
+      }
+    }
 
-		if ( cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day )
-		{
-			$day = '01';
-		}
+    if ( cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day )
+    {
+      $day = '01';
+    }
 
-		return "$year-$month-$day";
-	}
+    return "$year-$month-$day";
+  }
 
     private function extract_excerpt(string $html_fragment)
     {
+        // TODO: Remove this later
+        // return $html_fragment;
+
         $doc = new DOMDocument;
-        @$doc->loadHTML($html_fragment);
+        @$doc->loadHTML(htmlspecialchars_decode(htmlentities(html_entity_decode($html_fragment))));
 
         $paragraphs = $doc->getElementsByTagName('p');
 
@@ -278,8 +282,9 @@ class Articles
             $excerpt = $allElements[0]->nodeValue;
             if (0 == strlen(trim($excerpt)))
             {
-                return strip_tags($excerpt);
+                return '';
             }
+            return strip_tags($excerpt);
         }
 
         return '';
@@ -441,24 +446,26 @@ class Articles
                 continue;
             }
 
-            $importable_article_html = $this->html_fragment_clean($article['placeholders']['PH_article']['html']);
-            $importable_headline_text = $this->html_fragment_to_text($article['placeholders']['PH_headline']['text']);
+            // $importable_article_html = $this->html_fragment_clean($article['placeholders']['PH_article']['html']);
+            $importable_article_html = $article['placeholders']['PH_article']['html'];
+            $importable_article_html = htmlentities($importable_article_html);
+            $importable_headline_text = $this->convert_ascii($article['placeholders']['PH_headline']['text']);
 
-            echo '<div>';
-            echo $importable_headline_text;
-	        for( $i = 0; $i <= strlen($importable_headline_text); $i++ ) {
-		        $char = substr( $importable_headline_text, $i, 1 );
-		        $ord = ord($char);
-		        echo "<div><code>${char}</code> = ${ord}</div>";
-		        // $char contains the current character, so do your processing here
-	        }
-            echo '</div>';
+            // echo '<div>';
+            // echo $importable_headline_text;
+            // for( $i = 0; $i <= strlen($importable_headline_text); $i++ ) {
+            //     $char = substr( $importable_headline_text, $i, 1 );
+            //     $ord = ord($char);
+            //     echo "<div><code>${char}</code> = ${ord}</div>";
+            //     // $char contains the current character, so do your processing here
+            // }
+            // echo '</div>';
 
             $importable_arr                      = array();
             $importable_arr['categories']        = 'General';
             $importable_arr['content']           = trim($importable_article_html);
             $importable_arr['content_raw']       = trim($article['placeholders']['PH_article']['html']);
-            $importable_arr['excerpt']           = trim($this->extract_excerpt($importable_article_html));
+            $importable_arr['excerpt']           = trim($this->extract_excerpt($article['placeholders']['PH_article']['html']));
             $importable_arr['images']            = trim($this->extract_image_urls($article['placeholders']['PH_article']['html']));
             $importable_arr['path']              = $article['path'];
             $importable_arr['post_author']       = trim($this->extract_author($article['placeholders']['PH_contact']['text']));
@@ -477,24 +484,24 @@ class Articles
         return $arr;
     }
 
-    private function html_fragment_clean_entities($string)
-    {
-        $search = array(chr(145),
-            chr(146),
-            chr(147),
-            chr(148),
-            chr(150),
-            chr(151));
+    // private function html_fragment_clean_entities($string)
+    // {
+    //     $search = array(chr(145),
+    //         chr(146),
+    //         chr(147),
+    //         chr(148),
+    //         chr(150),
+    //         chr(151));
 
-        $replace = array('&lsquo;',
-            '&rsquo;',
-            '&ldquo;',
-            '&rdquo;',
-            '&ndash;',
-            '&mdash;');
+    //     $replace = array('&lsquo;',
+    //         '&rsquo;',
+    //         '&ldquo;',
+    //         '&rdquo;',
+    //         '&ndash;',
+    //         '&mdash;');
 
-        return str_replace($search, $replace, $string);
-    }
+    //     return str_replace($search, $replace, $string);
+    // }
 
     private function html_fragment_clean_pre (string $html_fragment) {
         $tidy_config = array(
@@ -563,8 +570,76 @@ class Articles
         return $html_fragment = strip_tags($html_fragment, '<a><b><em><i><p><strong>');
     }
 
+    private function convert_ascii (string $string) {
+        // Replace Single Curly Quotes
+        $search[]  = chr(226).chr(128).chr(152);
+        $replace[] = "'";
+        $search[]  = chr(226).chr(128).chr(153);
+        $replace[] = "'";
+
+        // Replace Smart Double Curly Quotes
+        $search[]  = chr(226).chr(128).chr(156);
+        $replace[] = '"';
+        $search[]  = chr(226).chr(128).chr(157);
+        $replace[] = '"';
+
+        // Replace En Dash
+        $search[]  = chr(226).chr(128).chr(147);
+        $replace[] = '--';
+
+        // Replace Em Dash
+        $search[]  = chr(226).chr(128).chr(148);
+        $replace[] = '---';
+
+        // Replace Bullet
+        $search[]  = chr(226).chr(128).chr(162);
+        $replace[] = '*';
+
+        // Replace Middle Dot
+        $search[]  = chr(194).chr(183);
+        $replace[] = '*';
+
+        // Replace Ellipsis with three consecutive dots
+        $search[]  = chr(226).chr(128).chr(166);
+        $replace[] = '...';
+
+        // Replace Non-breaking space with regular space
+        $search[]  = chr(194).chr(160);
+        $replace[] = ' ';
+
+        // Replace Carriage Return + Line Feed
+        $search[] = chr(13).chr(10);
+        $replace[] = '';
+
+        // Replace Line Feed
+        $search[] = chr(10);
+        $replace[] = '';
+
+        // Replace Carriage Return
+        $search[] = chr(13);
+        $replace[] = '';
+
+        // Apply Replacements
+        $string = str_replace($search, $replace, $string);
+
+        // Remove any non-ASCII Characters
+        $string = preg_replace("/[^\x01-\x7F]/","", $string);
+
+        return $string;
+    }
+
     private function html_fragment_clean(string $html_fragment)
     {
+        if (0 === strlen(trim($html_fragment)))
+        {
+            return '';
+        }
+        $html_fragment = htmlentities($html_fragment);
+        if (0 === strlen(trim($html_fragment)))
+        {
+            return '';
+        }
+        $html_fragment = $this->convert_ascii($html_fragment);
         if (0 === strlen(trim($html_fragment)))
         {
             return '';
@@ -574,11 +649,11 @@ class Articles
         {
             return '';
         }
-        $html_fragment = $this->html_fragment_clean_entities($html_fragment);
-        if (0 === strlen(trim($html_fragment)))
-        {
-            return '';
-        }
+        // $html_fragment = $this->html_fragment_clean_entities($html_fragment);
+        // if (0 === strlen(trim($html_fragment)))
+        // {
+        //     return '';
+        // }
         $html_fragment = $this->html_fragment_clean_tags($html_fragment);
         if (0 === strlen(trim($html_fragment)))
         {
@@ -627,15 +702,19 @@ class Articles
 --                     ORDER BY NEWID()
 --                   )
             WHERE postings.guid IN (
-                      -- Title ends in capital A circumflex
-               	      '14151E1C-7C07-4FA7-B79C-12869D0BC177',
-               	      '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
-               	      -- Title has lowercase a circumflex Euro TM
-               	      'EA277333-9279-4048-A8F4-DD480986B4A3',
-               	      '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
-               	      'A0926DFA-79A7-47C2-BA74-513B1E36D205',
-               	      -- Misplaced interrogation point
-               	      '4EAB1913-530A-4CF7-8621-83C0403AC0C8'
+                       -- Title ends in capital A circumflex
+                       '14151E1C-7C07-4FA7-B79C-12869D0BC177',
+                       '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
+                       -- Title has lowercase a circumflex Euro TM
+                       'EA277333-9279-4048-A8F4-DD480986B4A3',
+                       '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
+                       'A0926DFA-79A7-47C2-BA74-513B1E36D205',
+                       -- Title has misplaced interrogation point
+                       '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
+                       -- Body has wrong e aigu accent
+                       '6AC60A98-9757-416F-B354-BC93610372D0',
+                       -- Um... lots
+                       'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
                   )
          ORDER BY posting_name ASC
 SQL;
