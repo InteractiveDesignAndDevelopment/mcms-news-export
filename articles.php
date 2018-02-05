@@ -17,8 +17,9 @@ class Articles
 {
 
     // private $serverName = 'bubbleyum,2136';
+	// private $databaseName = 'ede';
     private $serverName = 'localhost';
-    private $databaseName = 'ede';
+	private $connectionOptions = array('Database' => 'mcms-export', 'CharacterSet' => 'UTF-8');
 
     /* Functions: Public */
 
@@ -26,7 +27,54 @@ class Articles
   {
 
     /* Connect using Windows Authentication. */
-    $conn = sqlsrv_connect( $this->serverName, array( 'Database'=>$this->databaseName, 'CharacterSet' => 'UTF-8' ) );
+    $conn = sqlsrv_connect( $this->serverName, $this->connectionOptions );
+
+    $sql = <<<SQL
+           SELECT postings.[guid]       AS posting_guid,
+                  postings.name         AS posting_name,
+                  postings.display_name AS posting_display_name,
+                  postings.[path]       AS posting_path,
+                  placeholders.name     AS placeholder_name,
+                  placeholders.[type]   AS placeholder_type,
+                  placeholders.html     AS placeholder_html,
+                  placeholders.[text]   AS placeholder_text
+             FROM postings
+        LEFT JOIN placeholders
+               ON postings.guid = placeholders.posting_guid
+            WHERE 1=1
+--               AND postings.[path] LIKE '/news/%'
+--               AND postings.guid IN
+--                   (
+--                       SELECT TOP 100 postings.guid
+--                         FROM postings
+--                        WHERE postings.[path] LIKE '/news/%'
+--                     ORDER BY NEWID()
+--                   )
+--               AND postings.guid IN (
+--                        -- Title ends in capital A circumflex
+--                        '14151E1C-7C07-4FA7-B79C-12869D0BC177',
+--                        '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
+--                        -- Title has lowercase a circumflex Euro TM
+--                        'EA277333-9279-4048-A8F4-DD480986B4A3',
+--                        '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
+--                        'A0926DFA-79A7-47C2-BA74-513B1E36D205',
+--                        -- Title has misplaced interrogation point
+--                        '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
+--                        -- Body has wrong e aigu accent
+--                        '6AC60A98-9757-416F-B354-BC93610372D0',
+--                        -- Um... lots
+--                        'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
+--                   )
+              AND postings.guid IN (
+                         SELECT TOP 10 po2.guid
+                           FROM postings po2
+                      LEFT JOIN placeholders pl2
+                             ON po2.guid = pl2.posting_guid
+                          WHERE po2.[path] LIKE '/news/%'
+                            AND pl2.html LIKE '%###%'
+                  )
+         ORDER BY posting_name ASC
+SQL;
 
     if ($conn === false)
     {
@@ -34,7 +82,7 @@ class Articles
       die( print_r( sqlsrv_errors(), true ) );
     }
 
-    $stmt = sqlsrv_query( $conn, $this->sql() );
+    $stmt = sqlsrv_query( $conn, $sql );
 
     if ($stmt === false)
     {
@@ -259,32 +307,34 @@ class Articles
 
     private function extract_excerpt(string $html_fragment)
     {
-        // TODO: Remove this later
-        // return $html_fragment;
+		// Old articles used this to demarcate the 'cut'
+    	$at_at_at_pos = strpos($html_fragment, '@@@');
 
-        $doc = new DOMDocument;
-        @$doc->loadHTML(htmlspecialchars_decode(htmlentities(html_entity_decode($html_fragment))));
+	    if (false !== $at_at_at_pos) {
+		    return strip_tags(substr($html_fragment, 0, $at_at_at_pos));
+        }
 
-        $paragraphs = $doc->getElementsByTagName('p');
+	    $doc = new DOMDocument;
+	    @$doc->loadHTML(htmlspecialchars_decode(htmlentities(html_entity_decode($html_fragment))));
+
+    	$paragraphs = $doc->getElementsByTagName('p');
 
         if (0 < $paragraphs->length) {
             $excerpt = $paragraphs[0]->nodeValue;
-            if (0 == strlen(trim($excerpt)))
+            if (0 < strlen(trim($excerpt)))
             {
-                return '';
+	            return strip_tags( $excerpt );
             }
-            return strip_tags($excerpt);
         }
 
         $allElements = $doc->getElementsByTagName('*');
 
         if (0 < $allElements->length) {
             $excerpt = $allElements[0]->nodeValue;
-            if (0 == strlen(trim($excerpt)))
+            if (0 < strlen(trim($excerpt)))
             {
-                return '';
+	            return strip_tags($excerpt);
             }
-            return strip_tags($excerpt);
         }
 
         return '';
@@ -448,6 +498,7 @@ class Articles
 
             // $importable_article_html = $this->html_fragment_clean($article['placeholders']['PH_article']['html']);
             $importable_article_html = $article['placeholders']['PH_article']['html'];
+            $importable_article_html = clean_article_html($importable_article_html);
             $importable_article_html = htmlentities($importable_article_html);
             $importable_headline_text = $this->convert_ascii($article['placeholders']['PH_headline']['text']);
 
@@ -483,25 +534,6 @@ class Articles
 
         return $arr;
     }
-
-    // private function html_fragment_clean_entities($string)
-    // {
-    //     $search = array(chr(145),
-    //         chr(146),
-    //         chr(147),
-    //         chr(148),
-    //         chr(150),
-    //         chr(151));
-
-    //     $replace = array('&lsquo;',
-    //         '&rsquo;',
-    //         '&ldquo;',
-    //         '&rdquo;',
-    //         '&ndash;',
-    //         '&mdash;');
-
-    //     return str_replace($search, $replace, $string);
-    // }
 
     private function html_fragment_clean_pre (string $html_fragment) {
         $tidy_config = array(
@@ -670,54 +702,6 @@ class Articles
             return '';
         }
         return $html_fragment;
-    }
-
-    private function html_fragment_to_text ($html_fragment)
-    {
-        $html_fragment = $this->html_fragment_clean_entities($html_fragment);
-        $html_fragment = strip_tags($html_fragment);
-        return $html_fragment;
-    }
-
-    private function sql()
-    {
-        return <<<SQL
-           SELECT postings.[guid]       AS posting_guid,
-                  postings.name         AS posting_name,
-                  postings.display_name AS posting_display_name,
-                  postings.[path]       AS posting_path,
-                  placeholders.name     AS placeholder_name,
-                  placeholders.[type]   AS placeholder_type,
-                  placeholders.html     AS placeholder_html,
-                  placeholders.[text]   AS placeholder_text
-             FROM postings
-        LEFT JOIN placeholders
-               ON postings.guid = placeholders.posting_guid
---             WHERE postings.[path] LIKE '/news/%'
---               AND postings.guid IN
---                   (
---                       SELECT TOP 100 postings.guid
---                         FROM postings
---                        WHERE postings.[path] LIKE '/news/%'
---                     ORDER BY NEWID()
---                   )
-            WHERE postings.guid IN (
-                       -- Title ends in capital A circumflex
-                       '14151E1C-7C07-4FA7-B79C-12869D0BC177',
-                       '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
-                       -- Title has lowercase a circumflex Euro TM
-                       'EA277333-9279-4048-A8F4-DD480986B4A3',
-                       '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
-                       'A0926DFA-79A7-47C2-BA74-513B1E36D205',
-                       -- Title has misplaced interrogation point
-                       '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
-                       -- Body has wrong e aigu accent
-                       '6AC60A98-9757-416F-B354-BC93610372D0',
-                       -- Um... lots
-                       'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
-                  )
-         ORDER BY posting_name ASC
-SQL;
     }
 
 }
