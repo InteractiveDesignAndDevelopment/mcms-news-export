@@ -32,6 +32,7 @@ class Article
     private $postSlug = '';
     private $tags = '';
     private $title = '';
+    private $titleOriginal = '';
     private $uniqueIdentifier = '';
 
     /**
@@ -41,9 +42,10 @@ class Article
      */
     public function __construct($details)
     {
-//        echo('<pre>');
-//        print_r($details);
-//        echo('</pre>');
+
+        echo '<pre>';
+        print_r($details);
+        echo '</pre>';
 
         if (! is_array($details)) {
             die('$details must be an array');
@@ -73,16 +75,22 @@ class Article
             die('placeholders must be an array');
         }
 
-        // MCMS article will only be general
+        // Title
+        $this->setTitleOriginal($details['placeholders']['PH_headline']['text']);
+        $this->setTitle($details['placeholders']['PH_headline']['text']);
+        $this->setTitle(trim($this->getTitle()));
+
+        // Content
+//        $this->setContentOriginal($details['placeholders']['PH_article']['html'])
+
+//        TODO: Implement author
+//        PH_contact
+
+//        TODO: Implement date
+//        PH_date
+
+        // MCMS articles will only be categorized as General
         $this->setCategories('General');
-
-        print_r($details);
-
-//        if () {
-//
-//        } else {
-//            die();
-//        }
     }
 
     /**
@@ -323,6 +331,22 @@ class Article
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitleOriginal(): string
+    {
+        return $this->titleOriginal;
+    }
+
+    /**
+     * @param string $titleOriginal
+     */
+    public function setTitleOriginal(string $titleOriginal): void
+    {
+        $this->titleOriginal = $titleOriginal;
     }
 
     /**
