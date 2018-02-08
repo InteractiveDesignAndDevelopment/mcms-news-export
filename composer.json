@@ -1,0 +1,16 @@
+{
+  "name": "InteractiveDesignAndDevelopment/MCMSNewsExport",
+  "description": "description_text",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Todd Sayre",
+      "email": "sayre_ts@mercer.edu"
+    }
+  ],
+  "require": {
+    "patchwork/utf8": "v1.3.1",
+    "php-di/php-di": "6.0.x-dev"
+  }
+}

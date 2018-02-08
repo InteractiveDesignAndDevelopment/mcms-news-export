@@ -10,10 +10,10 @@
  *
  */
 
-include_once('./articles.php');
+require_once('./class.articles.php');
 
-$articles = new Articles();
+//$articles = new class.articles();
 
 print '<pre><code>';
-print_r($articles->get());
+print_r($articles->find()->toArray());
 print '</code><pre>';

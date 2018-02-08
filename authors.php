@@ -10,8 +10,8 @@
 
 <?php
 
-include_once('./articles.php');
-$articles = new Articles;
+include_once('./class.articles.php');
+$articles = new articles;
 
 ?>
 
@@ -35,9 +35,9 @@ $articles = new Articles;
     <tbody>
         <?php
 
-        include_once('./articles.php');
+        include_once('./class.articles.php');
 
-        $articles = new Articles;
+        $articles = new articles;
 
         foreach ($articles->get() as $guid => $article)
         {

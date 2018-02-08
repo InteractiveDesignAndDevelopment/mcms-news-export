@@ -18,6 +18,7 @@
     </head>
     <body>
         <ul>
+            <li><a href="./titles.php">Titles</a></li>
             <li><a href="./authors.php">Authors</a></li>
             <li><a href="./print.php">Print</a></li>
             <li><a href="./preview.php">Preview</a></li>

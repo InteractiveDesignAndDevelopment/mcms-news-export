@@ -23,9 +23,9 @@
 
 <?php
 
-include_once('./articles.php');
+include_once('./class.articles.php');
 
-$articles = new Articles;
+$articles = new articles;
 
 foreach ($articles->get() as $guid => $article)
 {
@@ -70,6 +70,12 @@ foreach ($articles->get() as $guid => $article)
     echo '<div class="article__field-label">Excerpt</div>';
     echo "<div class='article__field-value'>{$article['excerpt']}</div>";
     echo '</div>';
+
+	echo '<div class="article__field article__field--raw">';
+	echo '<div class="article__field-label">Content (Raw)</div>';
+	$var = htmlentities($article['content_raw']);
+	echo "<div class='article__field-value'><pre><code>$var</code></pre></div>";
+	echo '</div>';
 
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Content</div>';

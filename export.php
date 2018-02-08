@@ -10,17 +10,17 @@
  *
  */
 
-include_once('./articles.php');
+include_once('./class.articles.php');
 
-$articles = new Articles;
+$articles = new articles;
 
 $xmlDom               = new DOMDocument('1.0');
 $xmlDom->formatOutput = true;
-$xmlArticles          = $xmlDom->createElement('articles');
+$xmlArticles          = $xmlDom->createElement('class.articles');
 
 foreach ($articles->get() as $guid => $article)
 {
-    $xmlArticle = $xmlDom->createElement('article');
+    $xmlArticle = $xmlDom->createElement('class.article');
 
     // Name
     $xmlElement = $xmlDom->createElement('title');
