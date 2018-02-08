@@ -12,7 +12,9 @@
 
 namespace IDD\MCMSExport;
 
-class articles
+require_once './class.article.php';
+
+class Articles
 {
 
     /**
@@ -23,10 +25,6 @@ class articles
      * @var array
      */
     private $articles = [];
-    /**
-     * @var mixed
-     */
-    private $stmt;
 
     /* Functions: Public */
 
@@ -45,10 +43,11 @@ class articles
      */
     public function __destruct()
     {
+        $this->conn = null;
     }
 
     /**
-     * @return articles
+     * @return Articles
      */
     public function find()
     {
@@ -99,27 +98,9 @@ class articles
          ORDER BY posting_name ASC
 SQL;
 
-//        $stmt = sqlsrv_query($this->conn, $sql);
+        $statementResults = $this->conn->query($sql);
 
-//        if ($stmt === false) {
-//            echo 'Error in executing query.</br>';
-//            die(print_r(sqlsrv_errors(), true));
-//        }
-
-//        print_r(sqlsrv_fetch_array($stmt));
-
-        $this->stmt = $this->conn->query($sql);
-
-//        $arr = $this->articles_stmt_to_grouped_arr($stmt);
-//
-////        print_r( $arr );
-//
-//        $arr = $this->grouped_arr_to_importable_arr($arr);
-//
-////        print_r( $arr );
-//
-//        /* Free statement and connection resources. */
-//        sqlsrv_free_stmt($stmt);
+        $this->articles = $this->statementResultsToArticleArray($statementResults);
 
         return $this;
     }
@@ -127,7 +108,8 @@ SQL;
     /**
      * @return array
      */
-//    public function toArray() {
+    public function toArray()
+    {
 //        $arr = [];
 //
 //        foreach ($this->stmtGrouped() as $guid => $details) {
@@ -136,21 +118,20 @@ SQL;
 //        }
 //
 //        return $arr;
-//    }
-
-    /* Functions: Private */
+        return $this->articles;
+    }
 
     /**
+     * @param $statementResults
+     *
      * @return array
      */
-    private function stmtGrouped()
+    public function statementResultsToArticleArray($statementResults)
     {
-        $arr = array();
+        $arr      = array();
+        $articles = array();
 
-        foreach ($this->stmt as $row) {
-//            print_r($row);
-//        }
-//        while ($row = sqlsrv_fetch_array($this->stmt)) {
+        foreach ($statementResults as $row) {
             $posting_guid     = $row['posting_guid'];
             $placeholder_name = $row['placeholder_name'];
 
@@ -172,6 +153,11 @@ SQL;
             // Posting::Display Name
             if ( ! isset($arr[$posting_guid]['display_name'])) {
                 $arr[$posting_guid]['display_name'] = $row['posting_display_name'];
+            }
+
+            // Posting::GUID
+            if ( ! isset($arr[$posting_guid]['posting_guid'])) {
+                $arr[$posting_guid]['guid'] = $row['posting_guid'];
             }
 
             // Posting::Name
@@ -200,7 +186,11 @@ SQL;
             }
         }
 
-        return $arr;
+        foreach ($arr as $a) {
+            $articles[] = new Article($a);
+        }
+
+        return $articles;
     }
 
 }

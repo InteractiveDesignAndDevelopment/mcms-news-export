@@ -1,17 +1,21 @@
 <!doctype html>
 <html>
-    <head>
-        <title>Titles</title>
-    </head>
-    <body>
-    <?php
-        require_once('./class.articles.php');
-        require_once ('./class.pdo.db.php');
+<head>
+    <title>Titles</title>
+</head>
+<body>
+<?php
 
-        $db = Db::getInstance();
-        $a = new Articles($db);
+require_once('./class.pdo.db.php');
+require_once('./class.articles.php');
 
-        print_r($a->find()->grouped());
-    ?>
-    </body>
+use IDD\MCMSExport\Db;
+
+$db = Db::getInstance();
+$a  = new \IDD\MCMSExport\Articles($db);
+
+print_r($a->find()->grouped());
+
+?>
+</body>
 </html>

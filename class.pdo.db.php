@@ -6,6 +6,8 @@
  * Time: 09:25 AM
  */
 
+namespace IDD\MCMSExport;
+
 class Db
 {
     private static $instance;
@@ -20,8 +22,8 @@ class Db
     {
         try {
             $this->connection = new \PDO("sqlsrv:server=$this->host;Database=$this->database");
-            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->connection->setAttribute(PDO::SQLSRV_ATTR_ENCODING, PDO::SQLSRV_ENCODING_UTF8);
+            $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $this->connection->setAttribute(\PDO::SQLSRV_ATTR_ENCODING, \PDO::SQLSRV_ENCODING_UTF8);
         } catch (PDOException $e) {
             die(print_r($e->getMessage()));
         }
@@ -34,7 +36,8 @@ class Db
      */
     public static function getInstance()
     {
-        if ( ! self::$instance) { // If no instance then make one
+        // If no instance then make one
+        if ( ! self::$instance) {
             self::$instance = new self();
         }
 
@@ -44,7 +47,7 @@ class Db
     /**
      * Get PDO connection
      *
-     * @return PDO
+     * @return \PDO
      */
     public function getConnection()
     {

@@ -1,6 +1,6 @@
 {
-  "name": "InteractiveDesignAndDevelopment/MCMSNewsExport",
-  "description": "description_text",
+  "name": "interactive-design-and-development/mcms-news-export",
+  "description": "Exporting news articles from MCMS",
   "minimum-stability": "stable",
   "license": "proprietary",
   "authors": [

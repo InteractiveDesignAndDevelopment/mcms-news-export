@@ -13,7 +13,9 @@
  * - array placeholders
  */
 
-class article
+namespace IDD\MCMSExport;
+
+class Article
 {
     private $categories = '';
     private $content = '';
@@ -39,19 +41,37 @@ class article
      */
     public function __construct($details)
     {
+//        echo('<pre>');
+//        print_r($details);
+//        echo('</pre>');
+
         if (! is_array($details)) {
             die('$details must be an array');
         }
 
-        if (! array_key_exists('guid')) {
+        if (! array_key_exists('guid', $details)) {
             die('$details must have a guid');
         }
 
-//        TODO: Implement these checks
-//        name
-//        display_name
-//        path
-//        placeholders
+        if (! array_key_exists('name', $details)) {
+            die('$details must have a name');
+        }
+
+        if (! array_key_exists('display_name', $details)) {
+            die('$details must have a display_name');
+        }
+
+        if (! array_key_exists('path', $details)) {
+            die('$details must have a path');
+        }
+
+        if (! array_key_exists('placeholders', $details)) {
+            die('$details must have placeholders');
+        }
+
+        if (! is_array($details['placeholders'])) {
+            die('placeholders must be an array');
+        }
 
         // MCMS article will only be general
         $this->setCategories('General');
