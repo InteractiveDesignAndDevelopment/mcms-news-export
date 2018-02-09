@@ -21,14 +21,14 @@
         <h2>Compare</h2>
 
         <ul>
-            <li><a href="compare-title.php">Titles</a></li>
-            <li><a href="compare-content.php">Content</a></li>
+            <li><a href="./compare-title.php">Titles</a></li>
+            <li><a href="./compare-content.php">Content</a></li>
+            <li><a href="./authors.php">Authors</a></li>
         </ul>
 
         <h2>Export</h2>
 
         <ul>
-            <li><a href="./authors.php">Authors</a></li>
             <li><a href="./print.php">Print</a></li>
             <li><a href="./preview.php">Preview</a></li>
             <li><a href="./export.php">Export</a></li>

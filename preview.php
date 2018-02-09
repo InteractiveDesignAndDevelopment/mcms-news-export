@@ -23,81 +23,108 @@
 
 <?php
 
-include_once('./class.articles.php');
+require_once('./class.pdo.db.php');
+require_once('./class.articles.php');
 
-$articles = new articles;
+use IDD\MCMSExport\Db;
 
-foreach ($articles->get() as $guid => $article)
+$db = Db::getInstance();
+$articles = new \IDD\MCMSExport\Articles($db);
+
+/** @var \IDD\MCMSExport\Article $article */
+foreach ($articles->find()->toArray() as $article)
 {
     echo '<div class="article">';
 
+    // Title
+    $code = $article->getTitle();
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Title</div>';
-    echo "<div class='article__field-value'>{$article['title']}</div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Post Slug
+    $code = htmlentities($article->getPostSlug());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Post Slug</div>';
-    echo "<div class='article__field-value'>{$article['post_slug']}</div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Unique Identifier
+    $code = htmlentities($article->getUniqueIdentifier());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Unique Identifier</div>';
-    echo "<div class='article__field-value'>{$article['unique_identifier']}</div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Post Author (Original)
+    $code = htmlentities($article->getPostAuthorOriginal());
     echo '<div class="article__field article__field--raw">';
-    echo '<div class="article__field-label">Post Author (Raw)</div>';
-    echo "<div class='article__field-value'>{$article['post_author_raw']}</div>";
+    echo '<div class="article__field-label">Post Author (Original)</div>';
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Post Author
+    $code = htmlentities($article->getPostAuthor());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Post Author</div>';
-    echo "<div class='article__field-value'>{$article['post_author']}</div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Post Date (Original)
+    $code = htmlentities($article->getPostDateOriginal());
     echo '<div class="article__field article__field--raw">';
-    echo '<div class="article__field-label">Post Date (Raw)</div>';
-    echo "<div class='article__field-value'>{$article['post_date_raw']}</div>";
+    echo '<div class="article__field-label">Post Date (Original)</div>';
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Post Date
+    $code = htmlentities($article->getPostDate());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Post Date</div>';
-    echo "<div class='article__field-value'>{$article['post_date']}</div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Excerpt
+    $code = htmlentities($article->getExcerpt());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Excerpt</div>';
-    echo "<div class='article__field-value'>{$article['excerpt']}</div>";
+    echo "<div class='article__field-value'>$code</div>";
     echo '</div>';
 
-	echo '<div class="article__field article__field--raw">';
-	echo '<div class="article__field-label">Content (Raw)</div>';
-	$var = htmlentities($article['content_raw']);
-	echo "<div class='article__field-value'><pre><code>$var</code></pre></div>";
-	echo '</div>';
+    // Content (Original)
+    $code = htmlentities($article->getContentOriginal());
+    echo '<div class="article__field article__field--raw">';
+    echo '<div class="article__field-label">Content (Original)</div>';
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
+    echo '</div>';
 
+    // Content
+    $code = htmlentities($article->getContent());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Content</div>';
-    $var = htmlentities($article['content']);
-    echo "<div class='article__field-value'><pre><code>$var</code></pre></div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Categories
+    $code = htmlentities($article->getCategories());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Categories</div>';
-    $var = htmlentities($article['categories']);
-    echo "<div class='article__field-value'><pre><code>$var</code></pre></div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Tags
+    $code = htmlentities($article->getTags());
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Tags</div>';
-    $var = htmlentities($article['tags']);
-    echo "<div class='article__field-value'><pre><code>$var</code></pre></div>";
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
+    // Images
+    $code = $article->getImages();
     echo '<div class="article__field">';
     echo '<div class="article__field-label">Images</div>';
-    echo "<div class='article__field-value'>{$article['images']}</div>";
+    echo "<div class='article__field-value'>$code</div>";
     echo '</div>';
 
     echo '</div>';  // .article

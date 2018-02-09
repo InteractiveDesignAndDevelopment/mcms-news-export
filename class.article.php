@@ -24,10 +24,8 @@ class Article
     private $images = '';
     private $path = '';
     private $postAuthor = '';
-    private $postAuthorClean = '';
     private $postAuthorOriginal = '';
     private $postDate = '';
-    private $postDateClean = '';
     private $postDateOriginal = '';
     private $postSlug = '';
     private $tags = '';
@@ -43,9 +41,9 @@ class Article
     public function __construct($details)
     {
 
-        echo '<pre>';
-        print_r($details);
-        echo '</pre>';
+//        echo '<pre>';
+//        print_r($details);
+//        echo '</pre>';
 
         if (! is_array($details)) {
             die('$details must be an array');
@@ -75,22 +73,45 @@ class Article
             die('placeholders must be an array');
         }
 
+        if (! array_key_exists('PH_headline', $details['placeholders'])) {
+            die('placeholders must have PH_headline');
+        }
+
+        if (! array_key_exists('PH_article', $details['placeholders'])) {
+            die('placeholders must have PH_article');
+        }
+
+        if (! array_key_exists('PH_contact', $details['placeholders'])) {
+            die('placeholders must have PH_contact');
+        }
+
+        if (! array_key_exists('PH_date', $details['placeholders'])) {
+            die('placeholders must have PH_date');
+        }
+
         // Title
         $this->setTitleOriginal($details['placeholders']['PH_headline']['text']);
-        $this->setTitle($details['placeholders']['PH_headline']['text']);
-        $this->setTitle(trim($this->getTitle()));
+        $this->setTitle(trim($this->getTitleOriginal()));
 
         // Content
-//        $this->setContentOriginal($details['placeholders']['PH_article']['html'])
+        $this->setContentOriginal($details['placeholders']['PH_article']['html']);
+        $this->setContent($this->getContentOriginal());
 
-//        TODO: Implement author
-//        PH_contact
+        // Post Author
+        $this->setPostAuthorOriginal($details['placeholders']['PH_contact']['html']);
+        $this->setPostAuthor($this->cleanPostAuthor($this->getPostAuthorOriginal()));
 
-//        TODO: Implement date
-//        PH_date
+        // Post Date
+        $this->setPostDateOriginal($details['placeholders']['PH_date']['text']);
+        $this->setPostDate($this->cleanPostDate($this->getPostDateOriginal(),
+            $details['name'],
+            $details['path']));
+
+        // Post Slug
+        $this->setPostSlug($details['name']);
 
         // MCMS articles will only be categorized as General
-        $this->setCategories('General');
+        $this->setCategories($this->extractCategories($this->getTitle()));
     }
 
     /**
@@ -208,22 +229,6 @@ class Article
     /**
      * @return string
      */
-    public function getPostAuthorClean(): string
-    {
-        return $this->postAuthorClean;
-    }
-
-    /**
-     * @param string $postAuthorClean
-     */
-    public function setPostAuthorClean(string $postAuthorClean): void
-    {
-        $this->postAuthorClean = $postAuthorClean;
-    }
-
-    /**
-     * @return string
-     */
     public function getPostAuthorOriginal(): string
     {
         return $this->postAuthorOriginal;
@@ -251,22 +256,6 @@ class Article
     public function setPostDate(string $postDate): void
     {
         $this->postDate = $postDate;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPostDateClean(): string
-    {
-        return $this->postDateClean;
-    }
-
-    /**
-     * @param string $postDateClean
-     */
-    public function setPostDateClean(string $postDateClean): void
-    {
-        $this->postDateClean = $postDateClean;
     }
 
     /**
@@ -390,7 +379,7 @@ class Article
 //	  return $images;
     }
 
-    private function tidy_html_fragment(string $html_fragment)
+    private function htmlFragmentTidy(string $html_fragment)
     {
         $tidy_config = array(
             'bare'                        => true,
@@ -413,7 +402,7 @@ class Article
         return $tidy->body();
     }
 
-    private function html_fragment_clean_attributes(string $html_fragment)
+    private function htmlFragmentCleanAttributes(string $html_fragment)
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($html_fragment);
@@ -439,66 +428,66 @@ class Article
         return $html_fragment;
     }
 
-    private function convert_ascii(string $string)
-    {
-        // Replace Single Curly Quotes
-        $search[]  = chr(226) . chr(128) . chr(152);
-        $replace[] = "'";
-        $search[]  = chr(226) . chr(128) . chr(153);
-        $replace[] = "'";
+//    private function convert_ascii(string $string)
+//    {
+//        // Replace Single Curly Quotes
+//        $search[]  = chr(226) . chr(128) . chr(152);
+//        $replace[] = "'";
+//        $search[]  = chr(226) . chr(128) . chr(153);
+//        $replace[] = "'";
+//
+//        // Replace Smart Double Curly Quotes
+//        $search[]  = chr(226) . chr(128) . chr(156);
+//        $replace[] = '"';
+//        $search[]  = chr(226) . chr(128) . chr(157);
+//        $replace[] = '"';
+//
+//        // Replace En Dash
+//        $search[]  = chr(226) . chr(128) . chr(147);
+//        $replace[] = '--';
+//
+//        // Replace Em Dash
+//        $search[]  = chr(226) . chr(128) . chr(148);
+//        $replace[] = '---';
+//
+//        // Replace Bullet
+//        $search[]  = chr(226) . chr(128) . chr(162);
+//        $replace[] = '*';
+//
+//        // Replace Middle Dot
+//        $search[]  = chr(194) . chr(183);
+//        $replace[] = '*';
+//
+//        // Replace Ellipsis with three consecutive dots
+//        $search[]  = chr(226) . chr(128) . chr(166);
+//        $replace[] = '...';
+//
+//        // Replace Non-breaking space with regular space
+//        $search[]  = chr(194) . chr(160);
+//        $replace[] = ' ';
+//
+//        // Replace Carriage Return + Line Feed
+//        $search[]  = chr(13) . chr(10);
+//        $replace[] = '';
+//
+//        // Replace Line Feed
+//        $search[]  = chr(10);
+//        $replace[] = '';
+//
+//        // Replace Carriage Return
+//        $search[]  = chr(13);
+//        $replace[] = '';
+//
+//        // Apply Replacements
+//        $string = str_replace($search, $replace, $string);
+//
+//        // Remove any non-ASCII Characters
+//        $string = preg_replace("/[^\x01-\x7F]/", "", $string);
+//
+//        return $string;
+//    }
 
-        // Replace Smart Double Curly Quotes
-        $search[]  = chr(226) . chr(128) . chr(156);
-        $replace[] = '"';
-        $search[]  = chr(226) . chr(128) . chr(157);
-        $replace[] = '"';
-
-        // Replace En Dash
-        $search[]  = chr(226) . chr(128) . chr(147);
-        $replace[] = '--';
-
-        // Replace Em Dash
-        $search[]  = chr(226) . chr(128) . chr(148);
-        $replace[] = '---';
-
-        // Replace Bullet
-        $search[]  = chr(226) . chr(128) . chr(162);
-        $replace[] = '*';
-
-        // Replace Middle Dot
-        $search[]  = chr(194) . chr(183);
-        $replace[] = '*';
-
-        // Replace Ellipsis with three consecutive dots
-        $search[]  = chr(226) . chr(128) . chr(166);
-        $replace[] = '...';
-
-        // Replace Non-breaking space with regular space
-        $search[]  = chr(194) . chr(160);
-        $replace[] = ' ';
-
-        // Replace Carriage Return + Line Feed
-        $search[]  = chr(13) . chr(10);
-        $replace[] = '';
-
-        // Replace Line Feed
-        $search[]  = chr(10);
-        $replace[] = '';
-
-        // Replace Carriage Return
-        $search[]  = chr(13);
-        $replace[] = '';
-
-        // Apply Replacements
-        $string = str_replace($search, $replace, $string);
-
-        // Remove any non-ASCII Characters
-        $string = preg_replace("/[^\x01-\x7F]/", "", $string);
-
-        return $string;
-    }
-
-    private function extract_excerpt(string $html_fragment)
+    private function extractExcerpt(string $html_fragment)
     {
         // Old articles used this to demarcate the 'cut'
         $at_at_at_pos = strpos($html_fragment, '@@@');
@@ -531,7 +520,7 @@ class Article
         return '';
     }
 
-    private function extract_image_urls(string $html_fragment)
+    private function extractImageUrls(string $html_fragment)
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($html_fragment);
@@ -545,7 +534,7 @@ class Article
         return $images;
     }
 
-    private function extract_author($text)
+    private function cleanPostAuthor($text)
     {
         $text   = strtolower(trim($text));
         $author = 'news';
@@ -677,30 +666,30 @@ class Article
         return $author;
     }
 
-    private function clean_author($text)
-    {
-        $text = str_replace(',', ' ', $text);
+//    private function clean_author($text)
+//    {
+//        $text = str_replace(',', ' ', $text);
+//
+//        $text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i', ' ', $text);
+//        $text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
+//        $text = preg_replace('/event contacts?\s*:?/i', ' ', $text);
+//        $text = preg_replace('/media contacts?\s*:?/i', ' ', $text);
+//        $text = preg_replace('/media advisorys?\s*:?/i', ' ', $text);
+//        $text = preg_replace('/registration contacts?\s*:?/i', ' ', $text);
+//        $text = preg_replace('/session contacts?\s*:?/i', ' ', $text);
+//        $text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i', ' ', $text);
+//        $text = preg_replace('/contact\s*:?/i', ' ', $text);
+//        $text = preg_replace('/ticket\s+sales?:?/i', ' ', $text);
+//        $text = preg_replace('/or\s*$/i', ' ', $text);
+//
+//        $text = preg_replace('/\s+/', ' ', $text);
+//
+//        $text = trim($text);
+//
+//        return $text;
+//    }
 
-        $text = preg_replace('/\(\d{3}(\)|\()\s*\d{3}\s*-\s*?\d{4}/i', ' ', $text);
-        $text = preg_replace('/\(?\d{3}\s*(-|\/)\s*\d{3}\s*-\s*\d{4}\)?/i', ' ', $text);
-        $text = preg_replace('/event contacts?\s*:?/i', ' ', $text);
-        $text = preg_replace('/media contacts?\s*:?/i', ' ', $text);
-        $text = preg_replace('/media advisorys?\s*:?/i', ' ', $text);
-        $text = preg_replace('/registration contacts?\s*:?/i', ' ', $text);
-        $text = preg_replace('/session contacts?\s*:?/i', ' ', $text);
-        $text = preg_replace('/ext(.?|\s+|.?\s+)\d+/i', ' ', $text);
-        $text = preg_replace('/contact\s*:?/i', ' ', $text);
-        $text = preg_replace('/ticket\s+sales?:?/i', ' ', $text);
-        $text = preg_replace('/or\s*$/i', ' ', $text);
-
-        $text = preg_replace('/\s+/', ' ', $text);
-
-        $text = trim($text);
-
-        return $text;
-    }
-
-    private function extract_date($date, $name, $path)
+    private function cleanPostDate($date, $name, $path)
     {
         $parsed_date = date_parse($date);
         preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
@@ -772,7 +761,7 @@ class Article
         return "$year-$month-$day";
     }
 
-    private function remove_forbidden_tags(string $html_fragment)
+    private function htmlFragmentCleanTags(string $html_fragment)
     {
         if (0 == strlen(trim($html_fragment))) {
             return '';
@@ -836,5 +825,22 @@ class Article
 //
 //        return $arr;
 //    }
+
+    /**
+     * @param $title string
+     *
+     * @return string
+     */
+    private function extractCategories($title) {
+        $categories = '';
+
+        if (false !== strpos($title, 'faculty') && false !== strpos($title, 'notables')) {
+            $categories &= ' Faculty Notables ';
+        } else {
+            $categories &= ' General ';
+        }
+
+        return $categories;
+    }
 
 }
