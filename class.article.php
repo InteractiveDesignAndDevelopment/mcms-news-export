@@ -105,16 +105,24 @@ class Article
         $content = $contentOriginal;
         $content = iconv('UTF-8', 'ASCII//TRANSLIT', $content);
         $content = $this->convertDivTagsToPTags($content);
-        $content = $this->cleanContentTags($content);
-//        $content = $this->cleanContentAttributes($content);
         $content = $this->cleanEmptyParagraphs($content);
-        $this->setContent(self::justTheBody($content));
+        $content = $this->cleanContentTags($content);
+        $content = $this->cleanContentAttributes($content);
+        $content = self::bodyHtml($content);
+        $this->setContent($content);
+
+        // Excerpt
+        $excerpt = $this->getContentOriginal();
+        $excerpt = iconv('UTF-8', 'ASCII//TRANSLIT', $excerpt);
+        $excerpt = self::extractExcerpt($excerpt);
+        $this->setExcerpt($excerpt);
 
         // Post Author
         $postAuthorOriginal = $details['placeholders']['PH_contact']['html'];
         $this->setPostAuthorOriginal($postAuthorOriginal);
         $postAuthor = $postAuthorOriginal;
         $postAuthor = iconv('UTF-8', 'ASCII//TRANSLIT', $postAuthor);
+        $postAuthor = $this::extractPostAuthor($postAuthor);
         $this->setPostAuthor($postAuthor);
 
         // Post Date
@@ -130,10 +138,10 @@ class Article
         $this->setCategories($this->extractCategories($this->getTitle()));
 
         // Tags (not being used)
-            $this->setTags('');
+        $this->setTags('');
 
         // Images
-        $this->setImages($this->extractImageUrls($contentOriginal));
+        $this->setImages($this->extractImageUrls($this->getContentOriginal()));
     }
 
     /**
@@ -177,17 +185,23 @@ class Article
         return $dom->saveHTML();
     }
 
-    private static function justTheBody($html) {
-        $start = strpos($html,'<body>') + 6;
-        $length = (strrpos($html,'</body>')) - strlen($html);
+    private static function bodyHtml($html)
+    {
+        $start  = strpos($html, '<body>');
+        if (false === $start) {
+            return $html;
+        } else {
+            $start += 6;
+        }
+        $length = (strrpos($html, '</body>')) - strlen($html);
         return substr($html, $start, $length);
     }
 
     /**
-     * @param \DOMNode $oldNode
+     * @param \DOMElement $oldNode
      * @param string $newTagName
      *
-     * @return \DOMNode
+     * @return \DOMElement
      */
     private static function changeTagName($oldNode, $newTagName)
     {
@@ -328,15 +342,15 @@ class Article
      */
     private static function extractCategories($title)
     {
-        $categories = '';
+        $categories = array();
 
         if (false !== strpos($title, 'faculty') && false !== strpos($title, 'notables')) {
-            $categories &= ' Faculty Notables ';
+            $categories[] = ' Faculty Notables ';
         } else {
-            $categories &= ' General ';
+            $categories[] = ' General ';
         }
 
-        return $categories;
+        return implode(', ', $categories);
     }
 
     /**
@@ -364,53 +378,50 @@ class Article
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
-        $elements = $dom->getElementsByTagName('img');
-        $images   = [];
+        $imgTags = $dom->getElementsByTagName('img');
+        $imageUrls = array();
 
-        /** @var DOMNodelist::item $element */
-        foreach ($elements as $element) {
-            $src       = $element->getattribute('src');
-            $images [] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
+        /** @var \DOMElement $element */
+        foreach ($imgTags as $element) {
+            $src = $element->getattribute('src');
+            $imageUrls[] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
         }
 
-        return implode(',', $images);
+        if (0 === count($imageUrls)) {
+            $imageUrls[] = self::getRandomStockImage();
+        }
+
+        return implode(',', $imageUrls);
     }
 
-    private static function extractExcerpt(string $html_fragment)
+    /**
+     * @param string $html
+     *
+     * @return string
+     */
+    private static function extractExcerpt(string $html)
     {
-        // Old articles used this to demarcate the 'cut'
-        $at_at_at_pos = strpos($html_fragment, '@@@');
+        $excerpt = '';
 
-        if (false !== $at_at_at_pos) {
-            return strip_tags(substr($html_fragment, 0, $at_at_at_pos));
-        }
+        $dom = new DOMDocument;
+        @$dom->loadHTML($html, LIBXML_COMPACT);
 
-        $doc = new DOMDocument;
-        @$doc->loadHTML(htmlspecialchars_decode(htmlentities(html_entity_decode($html_fragment))),
-            LIBXML_COMPACT);
-
-        $paragraphs = $doc->getElementsByTagName('p');
+        $paragraphs = $dom->getElementsByTagName('p');
 
         if (0 < $paragraphs->length) {
             $excerpt = $paragraphs[0]->nodeValue;
-            if (0 < strlen(trim($excerpt))) {
-                return strip_tags($excerpt);
-            }
+        } else {
+            $excerpt = strip_tags($html);
         }
 
-        $allElements = $doc->getElementsByTagName('*');
-
-        if (0 < $allElements->length) {
-            $excerpt = $allElements[0]->nodeValue;
-            if (0 < strlen(trim($excerpt))) {
-                return strip_tags($excerpt);
-            }
+        if (999 < strlen($excerpt)) {
+            $excerpt = self::smartTruncate($excerpt, 999, '...', true);
         }
 
-        return '';
+        return $excerpt;
     }
 
-    private static function cleanPostAuthor($text)
+    private static function extractPostAuthor($text)
     {
         $text   = strtolower(trim($text));
         $author = 'news';
@@ -698,65 +709,6 @@ class Article
         return $this->postDate;
     }
 
-//    private function convert_ascii(string $string)
-//    {
-//        // Replace Single Curly Quotes
-//        $search[]  = chr(226) . chr(128) . chr(152);
-//        $replace[] = "'";
-//        $search[]  = chr(226) . chr(128) . chr(153);
-//        $replace[] = "'";
-//
-//        // Replace Smart Double Curly Quotes
-//        $search[]  = chr(226) . chr(128) . chr(156);
-//        $replace[] = '"';
-//        $search[]  = chr(226) . chr(128) . chr(157);
-//        $replace[] = '"';
-//
-//        // Replace En Dash
-//        $search[]  = chr(226) . chr(128) . chr(147);
-//        $replace[] = '--';
-//
-//        // Replace Em Dash
-//        $search[]  = chr(226) . chr(128) . chr(148);
-//        $replace[] = '---';
-//
-//        // Replace Bullet
-//        $search[]  = chr(226) . chr(128) . chr(162);
-//        $replace[] = '*';
-//
-//        // Replace Middle Dot
-//        $search[]  = chr(194) . chr(183);
-//        $replace[] = '*';
-//
-//        // Replace Ellipsis with three consecutive dots
-//        $search[]  = chr(226) . chr(128) . chr(166);
-//        $replace[] = '...';
-//
-//        // Replace Non-breaking space with regular space
-//        $search[]  = chr(194) . chr(160);
-//        $replace[] = ' ';
-//
-//        // Replace Carriage Return + Line Feed
-//        $search[]  = chr(13) . chr(10);
-//        $replace[] = '';
-//
-//        // Replace Line Feed
-//        $search[]  = chr(10);
-//        $replace[] = '';
-//
-//        // Replace Carriage Return
-//        $search[]  = chr(13);
-//        $replace[] = '';
-//
-//        // Apply Replacements
-//        $string = str_replace($search, $replace, $string);
-//
-//        // Remove any non-ASCII Characters
-//        $string = preg_replace("/[^\x01-\x7F]/", "", $string);
-//
-//        return $string;
-//    }
-
     /**
      * @param string $postDate
      */
@@ -836,30 +788,77 @@ class Article
         return $tidy->body();
     }
 
-    private function cleanContentAttributes(string $html_fragment)
+    /**
+     * @param string $html
+     *
+     * @return string
+     */
+    private function cleanContentAttributes(string $html)
     {
         $dom = new DOMDocument;
-        @$dom->loadHTML($html_fragment, LIBXML_COMPACT);
-        $elements = $dom->getElementsByTagName('*');
-        foreach ($elements as $element) {
-//        echo '<pre>';
-//        print_r($element);
-//        echo '</pre>';
-            foreach ($element->attributes as $attribute) {
-//            echo '<pre>';
-//            print_r($attribute);
-//            echo '</pre>';
-                if (('a' !== $element->tagName && 'href' !== $attribute->name) ||
-                    ('img' !== $element->tagName && 'src' !== $attribute->name)) {
-                    $element->removeAttribute($attribute->nodeName);
+        @$dom->loadHTML($html, LIBXML_COMPACT);
+        $allElements = $dom->getElementsByTagName('*');
+        /** @var \DOMElement $el */
+        foreach ($allElements as $el) {
+
+            $attributesToRemove = array();
+
+            foreach ($el->attributes as $attr) {
+                if (! ('a' == $el->tagName && 'href' == $attr->nodeName)) {
+                    $attributesToRemove[] = $attr;
                 }
             }
-        }
-        $body_node     = $dom->getElementsByTagName('body')->item(0);
-        $html_fragment = $dom->saveHTML($body_node);
-        $html_fragment = preg_replace('/<\/?body>/', '', $html_fragment);
 
-        return $html_fragment;
+            /** @var \DOMAttr $attr */
+            foreach ($attributesToRemove as $attr) {
+                $el->removeAttributeNode($attr);
+            }
+
+        }
+
+        return $dom->saveHTML();
+    }
+
+    private static function smartTruncate($text, $maxLength = 140, $cutOff = '...', $keepWord = false)
+    {
+        if(strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        if(strlen($text) > $maxLength) {
+            if($keepWord) {
+                $text = substr($text, 0, $maxLength + 1);
+
+                if($last_space = strrpos($text, ' ')) {
+                    $text = substr($text, 0, $last_space);
+                    $text = rtrim($text);
+                    $text .=  $cutOff;
+                }
+            } else {
+                $text = substr($text, 0, $maxLength);
+                $text = rtrim($text);
+                $text .=  $cutOff;
+            }
+        }
+
+        return $text;
+    }
+
+    /**
+     * Matt should provide some real images
+     * Until then...
+     */
+    private static function getRandomStockImage() {
+        $imageUrls = array();
+
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicoly-cadams.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/ne-rage.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolson-forge.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolick-stage.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolfer-cagily.jpg';
+
+        return $imageUrls[array_rand($imageUrls)];
+
     }
 
 }
