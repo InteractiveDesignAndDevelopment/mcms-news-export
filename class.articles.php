@@ -68,16 +68,16 @@ class Articles
               AND postings.[path] NOT LIKE '%default'
               AND postings.[template_guid] = '2B44B611-1C16-4FA4-A1F2-35B460C277CF'
 -- Begin Random sampling -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-              AND postings.guid IN (
-           SELECT TOP 10 po2.guid
-             FROM postings po2
-        LEFT JOIN placeholders pl2 ON po2.guid = pl2.posting_guid
-            WHERE po2.[path] LIKE '/news/articles/%'
-              AND po2.[path] NOT LIKE '%default'
-              AND po2.[template_guid] = '2B44B611-1C16-4FA4-A1F2-35B460C277CF'
-         ORDER BY NEWID())
--- End Random sampling -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 --               AND postings.guid IN (
+--            SELECT TOP 10 po2.guid
+--              FROM postings po2
+--         LEFT JOIN placeholders pl2 ON po2.guid = pl2.posting_guid
+--             WHERE po2.[path] LIKE '/news/articles/%'
+--               AND po2.[path] NOT LIKE '%default'
+--               AND po2.[template_guid] = '2B44B611-1C16-4FA4-A1F2-35B460C277CF'
+--          ORDER BY NEWID())
+-- End Random sampling -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+              AND postings.guid IN (
 --                   -- Title ends in capital A circumflex
 --                   '14151E1C-7C07-4FA7-B79C-12869D0BC177',
 --                   '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
@@ -90,7 +90,9 @@ class Articles
 --                   -- Body has wrong e aigu accent
 --                   '6AC60A98-9757-416F-B354-BC93610372D0',
 --                   -- Um... lots
---                   'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3')
+--                   'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
+                     -- All divs, no ps
+                     'DB5DD77F-B34F-4630-B4FF-2101D32FFBDC')
          ORDER BY posting_name ASC
 SQL;
 
