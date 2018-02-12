@@ -108,6 +108,8 @@ class Article
         $content = $this->cleanEmptyParagraphs($content);
         $content = $this->cleanContentTags($content);
         $content = $this->cleanContentAttributes($content);
+        // Some a tags only had a name attribute and it was removed
+        $content = self::removeUselessATags($content);
         $content = self::bodyHtml($content);
         $this->setContent($content);
 
@@ -342,12 +344,13 @@ class Article
      */
     private static function extractCategories($title)
     {
+        $title = strtolower($title);
         $categories = array();
 
         if (false !== strpos($title, 'faculty') && false !== strpos($title, 'notables')) {
-            $categories[] = ' Faculty Notables ';
+            $categories[] = 'Faculty Notables';
         } else {
-            $categories[] = ' General ';
+            $categories[] = 'General';
         }
 
         return implode(', ', $categories);
@@ -765,28 +768,28 @@ class Article
         $this->uniqueIdentifier = $uniqueIdentifier;
     }
 
-    private function htmlFragmentTidy(string $html_fragment)
-    {
-        $tidy_config = array(
-            'bare'                        => true,
-            'clean'                       => true,
-            'drop-font-tags'              => true,
-            'drop-proprietary-attributes' => true,
-            'join-classes'                => true,
-            'logical-emphasis'            => true,
-            'merge-divs'                  => true,
-            'merge-spans'                 => true,
-            'quote-marks'                 => true,
-            'quote-nbsp'                  => true,
-            'show-body-only'              => true,
-            'word-2000'                   => true,
-            'wrap'                        => 0
-        );
-        $tidy        = tidy_parse_string($html_fragment, $tidy_config, 'UTF8');
-        $tidy->cleanRepair();
-
-        return $tidy->body();
-    }
+//    private function htmlFragmentTidy(string $html_fragment)
+//    {
+//        $tidy_config = array(
+//            'bare'                        => true,
+//            'clean'                       => true,
+//            'drop-font-tags'              => true,
+//            'drop-proprietary-attributes' => true,
+//            'join-classes'                => true,
+//            'logical-emphasis'            => true,
+//            'merge-divs'                  => true,
+//            'merge-spans'                 => true,
+//            'quote-marks'                 => true,
+//            'quote-nbsp'                  => true,
+//            'show-body-only'              => true,
+//            'word-2000'                   => true,
+//            'wrap'                        => 0
+//        );
+//        $tidy        = tidy_parse_string($html_fragment, $tidy_config, 'UTF8');
+//        $tidy->cleanRepair();
+//
+//        return $tidy->body();
+//    }
 
     /**
      * @param string $html
@@ -858,6 +861,28 @@ class Article
         $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolfer-cagily.jpg';
 
         return $imageUrls[array_rand($imageUrls)];
+
+    }
+
+    private static function removeUselessATags($html) {
+        $dom = new DOMDocument;
+        @$dom->loadHTML($html, LIBXML_COMPACT);
+        $els = $dom->getElementsByTagName('a');
+
+        /** @var \DOMElement $el */
+        foreach ($els as $el) {
+
+            if (0 === count(iterator_to_array($el->attributes))) {
+                self::changeTagName($el, 'deleteme');
+            }
+
+        }
+
+        $html = $dom->saveHTML();
+        $html = self::cleanContentTags($html);
+        $html = self::bodyHtml($html);
+
+        return $html;
 
     }
 

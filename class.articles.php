@@ -88,13 +88,18 @@ class Articles
                   -- Title has misplaced interrogation point
 --                   '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
                   -- Body has wrong e aigu accent
-                    '6AC60A98-9757-416F-B354-BC93610372D0',
+--                     '6AC60A98-9757-416F-B354-BC93610372D0',
                   -- Um... lots
-                    'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
+--                     'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
                      -- All divs, no ps
 --                     'DB5DD77F-B34F-4630-B4FF-2101D32FFBDC'
                     -- p tag with extraneous attributes
 --                     '005C9A2D-47F5-4AC8-B7D3-773D6947C273'
+                    -- Facutly & Staff Notables
+                    'ECC31E65-FB9E-4571-9EA4-2FFAD1B573D1',
+                    '81DBDD7A-BFA2-4593-BD83-C100C5D9600A',
+                    '88FA331A-6E75-44DB-83E8-312ED47F031A',
+                    '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1'
                   )
          ORDER BY posting_name ASC
 SQL;
