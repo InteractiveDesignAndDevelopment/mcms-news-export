@@ -27,14 +27,14 @@
     <li><a href="compare-users.php">Authors</a></li>
 </ul>
 
-<h2>Users</h2>
+<h2>Authors</h2>
 
 <p>
-    It turns out that this was a mostly manual process.
+    It turns out that exporting the authors was a mostly manual process.
 </p>
 
 <ul>
-    <li><a href="./users.xml">Export</a></li>
+    <li><a href="authors.xml">Export</a></li>
 </ul>
 
 <h2>Articles</h2>
