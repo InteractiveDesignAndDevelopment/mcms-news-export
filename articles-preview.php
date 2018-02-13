@@ -14,12 +14,12 @@
 <!doctype html>
 <html>
     <head>
-        <title>Preview</title>
+        <title>Articles Preview</title>
         <link href="./style.css" rel="stylesheet">
     </head>
     <body>
 
-        <h1>Preview</h1>
+        <h1>Articles Preview</h1>
 
 <?php
 

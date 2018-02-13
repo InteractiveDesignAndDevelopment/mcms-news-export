@@ -10,75 +10,83 @@
  *
  */
 
-include_once('./class.articles.php');
+header('Content-type: text/xml');
+header('Content-disposition: inline; filename=articles.xml');
 
-$articles = new articles;
+require_once('./class.pdo.db.php');
+require_once('./class.articles.php');
 
-$xmlDom               = new DOMDocument('1.0');
+use IDD\MCMSExport\Db;
+
+$db = Db::getInstance();
+$articles = new \IDD\MCMSExport\Articles($db);
+
+$xmlDom = new DOMDocument('1.0');
 $xmlDom->formatOutput = true;
-$xmlArticles          = $xmlDom->createElement('class.articles');
+$xmlArticles = $xmlDom->createElement('class.articles');
 
-foreach ($articles->get() as $guid => $article)
+/** @var \IDD\MCMSExport\Article $article */
+foreach ($articles->find()->toArray() as $article)
 {
     $xmlArticle = $xmlDom->createElement('class.article');
 
     // Name
     $xmlElement = $xmlDom->createElement('title');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['title'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getTitle()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Content
     $xmlElement = $xmlDom->createElement('content');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['content'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getContent()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Excerpt
     $xmlElement = $xmlDom->createElement('excerpt');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['excerpt'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getExcerpt()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Images
     $xmlElement = $xmlDom->createElement('images');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['images'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getImages()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Categories
     $xmlElement = $xmlDom->createElement('categories');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['categories'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getCategories()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Tags
     $xmlElement = $xmlDom->createElement('tags');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['tags'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getTags()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Post Date
     $xmlElement = $xmlDom->createElement('post_date');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['post_date'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getPostDate()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Post Slug
     $xmlElement = $xmlDom->createElement('post_slug');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['post_slug'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getPostSlug()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Post Author
     $xmlElement = $xmlDom->createElement('post_author');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['post_author'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getPostAuthor()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
     // Unique Identifier
     $xmlElement = $xmlDom->createElement('unique_identifier');
-    $xmlText = $xmlDom->createTextNode(htmlentities(utf8_encode($article['unique_identifier'])));
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getUniqueIdentifier()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
@@ -87,5 +95,4 @@ foreach ($articles->get() as $guid => $article)
 
 $xmlDom->appendChild($xmlArticles);
 
-header('Content-type: text/xml');
 echo $xmlDom->saveXML();

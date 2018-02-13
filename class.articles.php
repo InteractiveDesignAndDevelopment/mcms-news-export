@@ -77,10 +77,10 @@ class Articles
 --               AND po2.[template_guid] = '2B44B611-1C16-4FA4-A1F2-35B460C277CF'
 --          ORDER BY NEWID())
 -- End Random sampling -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-              AND postings.guid IN (
+--               AND postings.guid IN (
                   -- Title ends in capital A circumflex
 --                   '14151E1C-7C07-4FA7-B79C-12869D0BC177',
---                   '1F6C0185-A3D4-4B13-AA96-440FF2A4444D'
+--                   '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
                   -- Title has lowercase a circumflex Euro TM
 --                   'EA277333-9279-4048-A8F4-DD480986B4A3',
 --                   '6598359B-B1EE-463E-9E3B-85DE1B34C3A5',
@@ -88,19 +88,19 @@ class Articles
                   -- Title has misplaced interrogation point
 --                   '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
                   -- Body has wrong e aigu accent
---                     '6AC60A98-9757-416F-B354-BC93610372D0',
+--                   '6AC60A98-9757-416F-B354-BC93610372D0'
                   -- Um... lots
---                     'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3'
-                     -- All divs, no ps
---                     'DB5DD77F-B34F-4630-B4FF-2101D32FFBDC'
-                    -- p tag with extraneous attributes
---                     '005C9A2D-47F5-4AC8-B7D3-773D6947C273'
-                    -- Facutly & Staff Notables
-                    'ECC31E65-FB9E-4571-9EA4-2FFAD1B573D1',
-                    '81DBDD7A-BFA2-4593-BD83-C100C5D9600A',
-                    '88FA331A-6E75-44DB-83E8-312ED47F031A',
-                    '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1'
-                  )
+--                   'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3',
+                  -- All divs, no ps
+--                   'DB5DD77F-B34F-4630-B4FF-2101D32FFBDC',
+                  -- p tag with extraneous attributes
+--                   '005C9A2D-47F5-4AC8-B7D3-773D6947C273',
+                  -- Facutly & Staff Notables
+--                   'ECC31E65-FB9E-4571-9EA4-2FFAD1B573D1',
+--                   '81DBDD7A-BFA2-4593-BD83-C100C5D9600A',
+--                   '88FA331A-6E75-44DB-83E8-312ED47F031A',
+--                   '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1'
+--                   )
          ORDER BY posting_name ASC
 SQL;
 

@@ -103,6 +103,7 @@ class Article
         $contentOriginal = $details['placeholders']['PH_article']['html'];
         $this->setContentOriginal($contentOriginal);
         $content = $contentOriginal;
+        $content = htmlentities($content);
         $content = iconv('UTF-8', 'ASCII//TRANSLIT', $content);
         $content = $this->convertDivTagsToPTags($content);
         $content = $this->cleanEmptyParagraphs($content);
