@@ -15,6 +15,7 @@ $articles = new articles;
 <!doctype html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Compare Users</title>
     <link href="./style.css" rel="stylesheet">
 </head>

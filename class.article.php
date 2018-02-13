@@ -16,7 +16,6 @@
 namespace IDD\MCMSExport;
 
 use DOMDocument;
-use DOMNodeList;
 
 class Article
 {
@@ -106,7 +105,7 @@ class Article
         $contentOriginal = $details['placeholders']['PH_article']['html'];
         $this->setContentOriginal($contentOriginal);
         $content = $contentOriginal;
-        $content = htmlentities($content);
+        $content = htmlspecialchars_decode(htmlentities($content, ENT_QUOTES, 'UTF-8'));
         $content = iconv('UTF-8', 'ASCII//TRANSLIT', $content);
         $content = $this->convertDivTagsToPTags($content);
         $content = $this->cleanEmptyParagraphs($content);
@@ -566,7 +565,7 @@ class Article
             return '';
         }
 
-        return $html = strip_tags($html, '<a><b><em><i><p><strong>');
+        return $html = strip_tags($html, '<a><b><em><i><p><strong><table><tbody><td><thead><th><tr>');
     }
 
     /**

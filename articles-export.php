@@ -10,7 +10,7 @@
  *
  */
 
-header('Content-type: text/xml');
+header('Content-type: text/xml; charset=utf-8');
 header('Content-disposition: inline; filename=articles.xml');
 
 require_once('./class.pdo.db.php');

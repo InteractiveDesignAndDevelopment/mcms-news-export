@@ -88,7 +88,7 @@ class Articles
                   -- Title has misplaced interrogation point
 --                   '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
                   -- Body has wrong e aigu accent
---                   '6AC60A98-9757-416F-B354-BC93610372D0'
+                  '6AC60A98-9757-416F-B354-BC93610372D0'
                   -- Um... lots
 --                   'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3',
                   -- All divs, no ps
@@ -101,7 +101,7 @@ class Articles
 --                   '88FA331A-6E75-44DB-83E8-312ED47F031A',
 --                   '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1'
                      -- HTML entity in title and styling
-                     'DDA02377-690E-4523-9A8D-1F63A1C3D438'
+--                      'DDA02377-690E-4523-9A8D-1F63A1C3D438'
                   )
          ORDER BY posting_name ASC
 SQL;
