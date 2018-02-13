@@ -77,7 +77,7 @@ class Articles
 --               AND po2.[template_guid] = '2B44B611-1C16-4FA4-A1F2-35B460C277CF'
 --          ORDER BY NEWID())
 -- End Random sampling -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
---               AND postings.guid IN (
+              AND postings.guid IN (
                   -- Title ends in capital A circumflex
 --                   '14151E1C-7C07-4FA7-B79C-12869D0BC177',
 --                   '1F6C0185-A3D4-4B13-AA96-440FF2A4444D',
@@ -100,7 +100,9 @@ class Articles
 --                   '81DBDD7A-BFA2-4593-BD83-C100C5D9600A',
 --                   '88FA331A-6E75-44DB-83E8-312ED47F031A',
 --                   '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1'
---                   )
+                     -- HTML entity in title and styling
+                     'DDA02377-690E-4523-9A8D-1F63A1C3D438'
+                  )
          ORDER BY posting_name ASC
 SQL;
 

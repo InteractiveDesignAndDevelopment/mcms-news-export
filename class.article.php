@@ -97,7 +97,10 @@ class Article
 
         // Title
         $this->setTitleOriginal($details['placeholders']['PH_headline']['text']);
-        $this->setTitle(trim($this->getTitleOriginal()));
+        $title = $this->getTitleOriginal();
+        $title = iconv('UTF-8', 'ASCII//TRANSLIT', $title);
+        $title = trim($title);
+        $this->setTitle($title);
 
         // Content
         $contentOriginal = $details['placeholders']['PH_article']['html'];
