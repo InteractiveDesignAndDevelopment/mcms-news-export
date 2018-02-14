@@ -113,7 +113,7 @@ class Article
         $content = self::cleanContentAttributes($content);
         // Some a tags only had a name attribute and it was removed
         $content = self::removeUselessATags($content);
-        $content = self::tidy($content);
+        $content = self::bodyHtml($content);
         $this->setContent($content);
 
         // Excerpt
@@ -317,27 +317,6 @@ class Article
         $length = (strrpos($html, '</body>')) - strlen($html);
 
         return substr($html, $start, $length);
-    }
-
-    private static function tidy(string $html)
-    {
-        $tidy_config = array(
-            'bare'             => true,
-            'clean'            => true,
-            'indent'           => true,
-            'indent-spaces'    => 2,
-            'input-encoding'   => 'utf8',
-            'merge-divs'       => true,
-            'merge-emphasis'   => true,
-            'merge-spans'      => true,
-            'show-body-only'   => true,
-            'wrap'             => 0
-        );
-
-        $tidy = tidy_parse_string($html, $tidy_config, 'UTF8');
-        $tidy->cleanRepair();
-
-        return $tidy->body();
     }
 
     /**
