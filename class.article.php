@@ -24,6 +24,7 @@ class Article
     private $contentOriginal = '';
     private $excerpt = '';
     private $images = '';
+    private $mcmsGuid = '';
     private $path = '';
     private $postAuthor = '';
     private $postAuthorOriginal = '';
@@ -33,7 +34,6 @@ class Article
     private $tags = '';
     private $title = '';
     private $titleOriginal = '';
-    private $uniqueIdentifier = '';
 
     /**
      * class.article constructor.
@@ -91,8 +91,8 @@ class Article
             die('placeholders must have PH_date');
         }
 
-        // Unique Identifier
-        $this->setUniqueIdentifier($details['guid']);
+        // MCMS GUID
+        $this->setMcmsGuid($details['guid']);
 
         // Title
         $this->setTitleOriginal($details['placeholders']['PH_headline']['text']);
@@ -107,13 +107,13 @@ class Article
         $content = $contentOriginal;
         $content = htmlspecialchars_decode(htmlentities($content, ENT_QUOTES, 'UTF-8'));
         $content = iconv('UTF-8', 'ASCII//TRANSLIT', $content);
-        $content = $this->convertDivTagsToPTags($content);
-        $content = $this->cleanEmptyParagraphs($content);
-        $content = $this->cleanContentTags($content);
-        $content = $this->cleanContentAttributes($content);
+        $content = self::convertDivTagsToPTags($content);
+        $content = self::cleanEmptyParagraphs($content);
+        $content = self::cleanContentTags($content);
+        $content = self::cleanContentAttributes($content);
         // Some a tags only had a name attribute and it was removed
         $content = self::removeUselessATags($content);
-        $content = self::bodyHtml($content);
+        $content = self::tidy($content);
         $this->setContent($content);
 
         // Excerpt
@@ -190,18 +190,6 @@ class Article
         return $dom->saveHTML();
     }
 
-    private static function bodyHtml($html)
-    {
-        $start  = strpos($html, '<body>');
-        if (false === $start) {
-            return $html;
-        } else {
-            $start += 6;
-        }
-        $length = (strrpos($html, '</body>')) - strlen($html);
-        return substr($html, $start, $length);
-    }
-
     /**
      * @param \DOMElement $oldNode
      * @param string $newTagName
@@ -211,7 +199,7 @@ class Article
     private static function changeTagName($oldNode, $newTagName)
     {
         $oldNodeChildNodes = iterator_to_array($oldNode->childNodes);
-        $newNode = $oldNode->ownerDocument->createElement($newTagName);
+        $newNode           = $oldNode->ownerDocument->createElement($newTagName);
         foreach ($oldNodeChildNodes as $oldNodeChildNode) {
             $oldNodeChildNodeCopy = $oldNode->ownerDocument->importNode($oldNodeChildNode, true);
             $newNode->appendChild($oldNodeChildNodeCopy);
@@ -229,6 +217,9 @@ class Article
     }
 
     /**
+     * This function is not the same as the drop-empty-paras option in Tidy
+     * This takes into account whitespace.
+     *
      * @param string $html
      *
      * @return string
@@ -239,11 +230,11 @@ class Article
         @$dom->loadHTML($html, LIBXML_COMPACT);
         $nodeListP = $dom->getElementsByTagName('p');
         for ($i = $nodeListP->length - 1; 0 <= $i; $i--) {
-            $p = $nodeListP->item($i);
+            $p       = $nodeListP->item($i);
             $matches = array();
             preg_match('/\w/', $p->textContent, $matches);
             $hasWords = 0 < count($matches);
-            if (! $hasWords) {
+            if ( ! $hasWords) {
                 $p->parentNode->removeChild($p);
             }
         }
@@ -252,152 +243,117 @@ class Article
         return $dom->saveHTML();
     }
 
-    private static function cleanPostDate($date, $name, $path)
+    private static function cleanContentTags(string $html)
     {
-        $parsed_date = date_parse($date);
-        preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
-        preg_match('/^(\d+)/i', $name, $name_matches);
-
-//        echo '<pre>';
-//        print_r($parsed_date);
-//        echo '</pre>';
-
-        // Year
-        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year'])) {
-            $year = $parsed_date['year'];
-        } elseif (isset($path_matches[1]) && 4 == strlen($path_matches[1])) {
-            $year = $path_matches[1];
-        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
-            $year = substr($name_matches[1], 0, 2);
-            if ($year < 0) {
-                $year = "20$year";
-            } else {
-                $year = "19$year";
-            }
-        } else {
-            $year = '1900';
+        if (0 == strlen(trim($html))) {
+            return '';
         }
 
-        // Month
-        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month'])) {
-            $month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
-        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
-            $month = substr($name_matches[1], 2, 2);
-        } elseif (isset($name_matches[1]) && 4 == strlen($name_matches[1])) {
-            $month = substr($name_matches[1], 0, 2);
-        } elseif (isset($name_matches[1]) && 2 == strlen($name_matches[1])) {
-            $month = $name_matches[1];
-        } else {
-            $month = '01';
-        }
-
-        // Day
-        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['day'])) {
-            $day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
-        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
-            $day = substr($name_matches[1], 4, 2);
-        } elseif (isset($name_matches[1]) && 4 == strlen($name_matches[1])) {
-            $day = substr($name_matches[1], 2, 2);
-        } else {
-            $day = '01';
-        }
-
-        // Last chance to deal with errors
-        if ($year < 1900 || 2013 < $year) {
-            $year = '1900';
-        }
-
-        if (12 < $month) {
-            if ($day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year)) {
-                $temp  = $month;
-                $month = $day;
-                $day   = $temp;
-            } else {
-                $month = '01';
-            }
-        }
-
-        if (cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day) {
-            $day = '01';
-        }
-
-        return "$year-$month-$day";
+        return $html = strip_tags($html, '<a><b><em><i><p><strong><table><tbody><td><thead><th><tr>');
     }
 
     /**
-     * @return string
-     */
-    public function getPostDateOriginal(): string
-    {
-        return $this->postDateOriginal;
-    }
-
-    /**
-     * @param string $postDateOriginal
-     */
-    public function setPostDateOriginal(string $postDateOriginal): void
-    {
-        $this->postDateOriginal = $postDateOriginal;
-    }
-
-    /**
-     * @param $title string
+     * @param string $html
      *
      * @return string
      */
-    private static function extractCategories($title)
-    {
-        $title = strtolower($title);
-        $categories = array();
-
-        if (false !== strpos($title, 'faculty') && false !== strpos($title, 'notables')) {
-            $categories[] = 'Faculty Notables';
-        } else {
-            $categories[] = 'General';
-        }
-
-        return implode(', ', $categories);
-    }
-
-    /**
-     * @return string
-     */
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    /**
-     * @param string $title
-     */
-    public function setTitle(string $title): void
-    {
-        $this->title = $title;
-    }
-
-    /**
-     * @param string $htmlFragment
-     *
-     * @return string
-     */
-    private static function extractImageUrls(string $htmlFragment)
+    private static function cleanContentAttributes(string $html)
     {
         $dom = new DOMDocument;
-        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
-        $imgTags = $dom->getElementsByTagName('img');
-        $imageUrls = array();
+        @$dom->loadHTML($html, LIBXML_COMPACT);
+        $allElements = $dom->getElementsByTagName('*');
+        /** @var \DOMElement $el */
+        foreach ($allElements as $el) {
 
-        /** @var \DOMElement $element */
-        foreach ($imgTags as $element) {
-            $src = $element->getattribute('src');
-            $imageUrls[] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
+            $attributesToRemove = array();
+
+            foreach ($el->attributes as $attr) {
+                if ( ! ('a' == $el->tagName && 'href' == $attr->nodeName)) {
+                    $attributesToRemove[] = $attr;
+                }
+            }
+
+            /** @var \DOMAttr $attr */
+            foreach ($attributesToRemove as $attr) {
+                $el->removeAttributeNode($attr);
+            }
+
         }
 
-        if (0 === count($imageUrls)) {
-            $imageUrls[] = self::getRandomStockImage();
+        return $dom->saveHTML();
+    }
+
+    private static function removeUselessATags($html)
+    {
+        $dom = new DOMDocument;
+        @$dom->loadHTML($html, LIBXML_COMPACT);
+        $els = $dom->getElementsByTagName('a');
+
+        /** @var \DOMElement $el */
+        foreach ($els as $el) {
+
+            if (0 === count(iterator_to_array($el->attributes))) {
+                self::changeTagName($el, 'deleteme');
+            }
+
         }
 
-        return implode(',', $imageUrls);
+        $html = $dom->saveHTML();
+        $html = self::cleanContentTags($html);
+        $html = self::bodyHtml($html);
+
+        return $html;
+
+    }
+
+    private static function bodyHtml($html)
+    {
+        $start = strpos($html, '<body>');
+        if (false === $start) {
+            return $html;
+        } else {
+            $start += 6;
+        }
+        $length = (strrpos($html, '</body>')) - strlen($html);
+
+        return substr($html, $start, $length);
+    }
+
+    private static function tidy(string $html)
+    {
+        $tidy_config = array(
+            'bare'             => true,
+            'clean'            => true,
+            'indent'           => true,
+            'indent-spaces'    => 2,
+            'input-encoding'   => 'utf8',
+            'merge-divs'       => true,
+            'merge-emphasis'   => true,
+            'merge-spans'      => true,
+            'show-body-only'   => true,
+            'wrap'             => 200
+        );
+
+        $tidy = tidy_parse_string($html, $tidy_config, 'UTF8');
+        $tidy->cleanRepair();
+
+        return $tidy->body();
+    }
+
+    /**
+     * @return string
+     */
+    public function getContentOriginal(): string
+    {
+        return $this->contentOriginal;
+    }
+
+    /**
+     * @param string $contentOriginal
+     */
+    public function setContentOriginal(string $contentOriginal): void
+    {
+        $this->contentOriginal = $contentOriginal;
     }
 
     /**
@@ -425,6 +381,31 @@ class Article
         }
 
         return $excerpt;
+    }
+
+    private static function smartTruncate($text, $maxLength = 140, $cutOff = '...', $keepWord = false)
+    {
+        if (strlen($text) <= $maxLength) {
+            return $text;
+        }
+
+        if (strlen($text) > $maxLength) {
+            if ($keepWord) {
+                $text = substr($text, 0, $maxLength + 1);
+
+                if ($last_space = strrpos($text, ' ')) {
+                    $text = substr($text, 0, $last_space);
+                    $text = rtrim($text);
+                    $text .= $cutOff;
+                }
+            } else {
+                $text = substr($text, 0, $maxLength);
+                $text = rtrim($text);
+                $text .= $cutOff;
+            }
+        }
+
+        return $text;
     }
 
     private static function extractPostAuthor($text)
@@ -559,13 +540,170 @@ class Article
         return $author;
     }
 
-    private static function cleanContentTags(string $html)
+    private static function cleanPostDate($date, $name, $path)
     {
-        if (0 == strlen(trim($html))) {
-            return '';
+        $parsed_date = date_parse($date);
+        preg_match('/^\/news\/articles\/(\d{4})/i', $path, $path_matches);
+        preg_match('/^(\d+)/i', $name, $name_matches);
+
+//        echo '<pre>';
+//        print_r($parsed_date);
+//        echo '</pre>';
+
+        // Year
+        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['year'])) {
+            $year = $parsed_date['year'];
+        } elseif (isset($path_matches[1]) && 4 == strlen($path_matches[1])) {
+            $year = $path_matches[1];
+        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
+            $year = substr($name_matches[1], 0, 2);
+            if ($year < 0) {
+                $year = "20$year";
+            } else {
+                $year = "19$year";
+            }
+        } else {
+            $year = '1900';
         }
 
-        return $html = strip_tags($html, '<a><b><em><i><p><strong><table><tbody><td><thead><th><tr>');
+        // Month
+        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['month'])) {
+            $month = str_pad($parsed_date['month'], 2, '0', STR_PAD_LEFT);
+        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
+            $month = substr($name_matches[1], 2, 2);
+        } elseif (isset($name_matches[1]) && 4 == strlen($name_matches[1])) {
+            $month = substr($name_matches[1], 0, 2);
+        } elseif (isset($name_matches[1]) && 2 == strlen($name_matches[1])) {
+            $month = $name_matches[1];
+        } else {
+            $month = '01';
+        }
+
+        // Day
+        if ($parsed_date && 0 == $parsed_date['error_count'] && 0 < strlen($parsed_date['day'])) {
+            $day = str_pad($parsed_date['day'], 2, '0', STR_PAD_LEFT);
+        } elseif (isset($name_matches[1]) && 6 == strlen($name_matches[1])) {
+            $day = substr($name_matches[1], 4, 2);
+        } elseif (isset($name_matches[1]) && 4 == strlen($name_matches[1])) {
+            $day = substr($name_matches[1], 2, 2);
+        } else {
+            $day = '01';
+        }
+
+        // Last chance to deal with errors
+        if ($year < 1900 || 2013 < $year) {
+            $year = '1900';
+        }
+
+        if (12 < $month) {
+            if ($day < 12 && $month < cal_days_in_month(CAL_GREGORIAN, $day, $year)) {
+                $temp  = $month;
+                $month = $day;
+                $day   = $temp;
+            } else {
+                $month = '01';
+            }
+        }
+
+        if (cal_days_in_month(CAL_GREGORIAN, $month, $year) < $day) {
+            $day = '01';
+        }
+
+        return "$year-$month-$day";
+    }
+
+    /**
+     * @return string
+     */
+    public function getPostDateOriginal(): string
+    {
+        return $this->postDateOriginal;
+    }
+
+    /**
+     * @param string $postDateOriginal
+     */
+    public function setPostDateOriginal(string $postDateOriginal): void
+    {
+        $this->postDateOriginal = $postDateOriginal;
+    }
+
+    /**
+     * @param $title string
+     *
+     * @return string
+     */
+    private static function extractCategories($title)
+    {
+        $title      = strtolower($title);
+        $categories = array();
+
+        if (false !== strpos($title, 'faculty') && false !== strpos($title, 'notables')) {
+            $categories[] = 'Faculty Notables';
+        } else {
+            $categories[] = 'General';
+        }
+
+        return implode(', ', $categories);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * @param string $title
+     */
+    public function setTitle(string $title): void
+    {
+        $this->title = $title;
+    }
+
+    /**
+     * @param string $htmlFragment
+     *
+     * @return string
+     */
+    private static function extractImageUrls(string $htmlFragment)
+    {
+        $dom = new DOMDocument;
+        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
+        $imgTags   = $dom->getElementsByTagName('img');
+        $imageUrls = array();
+
+        /** @var \DOMElement $element */
+        foreach ($imgTags as $element) {
+            $src         = $element->getattribute('src');
+            $imageUrls[] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
+        }
+
+        if (0 === count($imageUrls)) {
+            $imageUrls[] = self::getRandomStockImage();
+        }
+
+        return implode(',', $imageUrls);
+    }
+
+    /**
+     * Matt should provide some real images
+     * Until then...
+     */
+    private static function getRandomStockImage()
+    {
+        $imageUrls = array();
+
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicoly-cadams.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/ne-rage.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolson-forge.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolick-stage.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolfer-cagily.jpg';
+
+        return $imageUrls[array_rand($imageUrls)];
+
     }
 
     /**
@@ -598,22 +736,6 @@ class Article
     public function setContent(string $content): void
     {
         $this->content = $content;
-    }
-
-    /**
-     * @return string
-     */
-    public function getContentOriginal(): string
-    {
-        return $this->contentOriginal;
-    }
-
-    /**
-     * @param string $contentOriginal
-     */
-    public function setContentOriginal(string $contentOriginal): void
-    {
-        $this->contentOriginal = $contentOriginal;
     }
 
     /**
@@ -688,17 +810,6 @@ class Article
         return $this->postAuthorOriginal;
     }
 
-//    private function html_fragment_clean_post (string $html_fragment) {
-//        $tidy_config = array(
-//            'output-html'                 => true,
-//            'show-body-only'              => true,
-//            'wrap'                        => 0,
-//        );
-//        $tidy = tidy_parse_string($html_fragment, $tidy_config, 'UTF8');
-//        $tidy->cleanRepair();
-//        return preg_replace('/<\/?body>/', '', $tidy->body());
-//    }
-
     /**
      * @param string $postAuthorOriginal
      */
@@ -758,135 +869,17 @@ class Article
     /**
      * @return string
      */
-    public function getUniqueIdentifier(): string
+    public function getMcmsGuid(): string
     {
-        return $this->uniqueIdentifier;
+        return $this->mcmsGuid;
     }
 
     /**
-     * @param string $uniqueIdentifier
+     * @param string $mcmsGuid
      */
-    public function setUniqueIdentifier(string $uniqueIdentifier): void
+    public function setMcmsGuid(string $mcmsGuid): void
     {
-        $this->uniqueIdentifier = $uniqueIdentifier;
-    }
-
-//    private function htmlFragmentTidy(string $html_fragment)
-//    {
-//        $tidy_config = array(
-//            'bare'                        => true,
-//            'clean'                       => true,
-//            'drop-font-tags'              => true,
-//            'drop-proprietary-attributes' => true,
-//            'join-classes'                => true,
-//            'logical-emphasis'            => true,
-//            'merge-divs'                  => true,
-//            'merge-spans'                 => true,
-//            'quote-marks'                 => true,
-//            'quote-nbsp'                  => true,
-//            'show-body-only'              => true,
-//            'word-2000'                   => true,
-//            'wrap'                        => 0
-//        );
-//        $tidy        = tidy_parse_string($html_fragment, $tidy_config, 'UTF8');
-//        $tidy->cleanRepair();
-//
-//        return $tidy->body();
-//    }
-
-    /**
-     * @param string $html
-     *
-     * @return string
-     */
-    private function cleanContentAttributes(string $html)
-    {
-        $dom = new DOMDocument;
-        @$dom->loadHTML($html, LIBXML_COMPACT);
-        $allElements = $dom->getElementsByTagName('*');
-        /** @var \DOMElement $el */
-        foreach ($allElements as $el) {
-
-            $attributesToRemove = array();
-
-            foreach ($el->attributes as $attr) {
-                if (! ('a' == $el->tagName && 'href' == $attr->nodeName)) {
-                    $attributesToRemove[] = $attr;
-                }
-            }
-
-            /** @var \DOMAttr $attr */
-            foreach ($attributesToRemove as $attr) {
-                $el->removeAttributeNode($attr);
-            }
-
-        }
-
-        return $dom->saveHTML();
-    }
-
-    private static function smartTruncate($text, $maxLength = 140, $cutOff = '...', $keepWord = false)
-    {
-        if(strlen($text) <= $maxLength) {
-            return $text;
-        }
-
-        if(strlen($text) > $maxLength) {
-            if($keepWord) {
-                $text = substr($text, 0, $maxLength + 1);
-
-                if($last_space = strrpos($text, ' ')) {
-                    $text = substr($text, 0, $last_space);
-                    $text = rtrim($text);
-                    $text .=  $cutOff;
-                }
-            } else {
-                $text = substr($text, 0, $maxLength);
-                $text = rtrim($text);
-                $text .=  $cutOff;
-            }
-        }
-
-        return $text;
-    }
-
-    /**
-     * Matt should provide some real images
-     * Until then...
-     */
-    private static function getRandomStockImage() {
-        $imageUrls = array();
-
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicoly-cadams.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/ne-rage.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolson-forge.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolick-stage.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolfer-cagily.jpg';
-
-        return $imageUrls[array_rand($imageUrls)];
-
-    }
-
-    private static function removeUselessATags($html) {
-        $dom = new DOMDocument;
-        @$dom->loadHTML($html, LIBXML_COMPACT);
-        $els = $dom->getElementsByTagName('a');
-
-        /** @var \DOMElement $el */
-        foreach ($els as $el) {
-
-            if (0 === count(iterator_to_array($el->attributes))) {
-                self::changeTagName($el, 'deleteme');
-            }
-
-        }
-
-        $html = $dom->saveHTML();
-        $html = self::cleanContentTags($html);
-        $html = self::bodyHtml($html);
-
-        return $html;
-
+        $this->mcmsGuid = $mcmsGuid;
     }
 
 }

@@ -54,6 +54,12 @@ foreach ($articles->find()->toArray() as $article)
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 
+    // MCMS GUID
+    $xmlElement = $xmlDom->createElement('mcms_guid');
+    $xmlText = $xmlDom->createTextNode(htmlentities($article->getMcmsGuid()));
+    $xmlElement->appendChild($xmlText);
+    $xmlArticle->appendChild($xmlElement);
+
     // Categories
     $xmlElement = $xmlDom->createElement('categories');
     $xmlText = $xmlDom->createTextNode(htmlentities($article->getCategories()));
@@ -81,12 +87,6 @@ foreach ($articles->find()->toArray() as $article)
     // Post Author
     $xmlElement = $xmlDom->createElement('post_author');
     $xmlText = $xmlDom->createTextNode(htmlentities($article->getPostAuthor()));
-    $xmlElement->appendChild($xmlText);
-    $xmlArticle->appendChild($xmlElement);
-
-    // Unique Identifier
-    $xmlElement = $xmlDom->createElement('unique_identifier');
-    $xmlText = $xmlDom->createTextNode(htmlentities($article->getUniqueIdentifier()));
     $xmlElement->appendChild($xmlText);
     $xmlArticle->appendChild($xmlElement);
 

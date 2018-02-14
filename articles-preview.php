@@ -51,10 +51,10 @@ foreach ($articles->find()->toArray() as $article)
     echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
-    // Unique Identifier
-    $code = htmlentities($article->getUniqueIdentifier());
+    // MCMS GUID
+    $code = htmlentities($article->getMcmsGuid());
     echo '<div class="article__field">';
-    echo '<div class="article__field-label">Unique Identifier</div>';
+    echo '<div class="article__field-label">MCMS GUID</div>';
     echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
     echo '</div>';
 
