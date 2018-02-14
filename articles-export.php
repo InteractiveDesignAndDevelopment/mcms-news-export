@@ -23,12 +23,12 @@ $articles = new \IDD\MCMSExport\Articles($db);
 
 $xmlDom = new DOMDocument('1.0');
 $xmlDom->formatOutput = true;
-$xmlArticles = $xmlDom->createElement('class.articles');
+$xmlArticles = $xmlDom->createElement('articles');
 
 /** @var \IDD\MCMSExport\Article $article */
 foreach ($articles->find()->toArray() as $article)
 {
-    $xmlArticle = $xmlDom->createElement('class.article');
+    $xmlArticle = $xmlDom->createElement('article');
 
     // Name
     $xmlElement = $xmlDom->createElement('title');
