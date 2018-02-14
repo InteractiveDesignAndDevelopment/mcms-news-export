@@ -331,7 +331,7 @@ class Article
             'merge-emphasis'   => true,
             'merge-spans'      => true,
             'show-body-only'   => true,
-            'wrap'             => 200
+            'wrap'             => 0
         );
 
         $tidy = tidy_parse_string($html, $tidy_config, 'UTF8');
