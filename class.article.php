@@ -108,6 +108,7 @@ class Article
         $content = htmlspecialchars_decode(htmlentities($content, ENT_QUOTES, 'UTF-8'));
         $content = iconv('UTF-8', 'ASCII//TRANSLIT', $content);
         $content = self::convertDivTagsToPTags($content);
+        $content = self::changeTagNames($content, 'h1', 'h2');
         $content = self::cleanEmptyParagraphs($content);
         $content = self::cleanContentTags($content);
         $content = self::cleanContentAttributes($content);
@@ -166,14 +167,14 @@ class Article
     }
 
     /**
-     * @param string $htmlFragment
+     * @param string $html
      *
      * @return string
      */
-    private static function convertDivTagsToPTags($htmlFragment)
+    private static function convertDivTagsToPTags($html)
     {
         $dom = new DOMDocument;
-        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
+        @$dom->loadHTML($html, LIBXML_COMPACT);
         $nodeListP   = $dom->getElementsByTagName('p');
         $nodeListDiv = $dom->getElementsByTagName('div');
 
@@ -182,12 +183,40 @@ class Article
 //        echo '</pre>';
 
         if (0 == $nodeListP->length && 0 < $nodeListDiv->length) {
-            for ($i = $nodeListDiv->length - 1; 0 <= $i; $i--) {
-                self::changeTagName($nodeListDiv->item($i), 'p');
-            }
+            self::changeTagNames($html, 'div', 'p');
         }
 
-        return $dom->saveHTML();
+        $newHtml = $dom->saveHTML();
+        $newHtml = self::bodyHtml($newHtml);
+
+        return $newHtml;
+    }
+
+    /**
+     * @param string $html
+     * @param string $oldTagName
+     * @param string $newTagName
+     *
+     * @return string
+     */
+    private static function changeTagNames($html, $oldTagName, $newTagName)
+    {
+        $dom = new DOMDocument;
+        @$dom->loadHTML($html, LIBXML_COMPACT);
+        $nodeList   = $dom->getElementsByTagName($oldTagName);
+
+//        echo '<pre>';
+//        print_r($nodeListDiv);
+//        echo '</pre>';
+
+        for ($i = $nodeList->length - 1; 0 <= $i; $i--) {
+            self::changeTagName($nodeList->item($i), $newTagName);
+        }
+
+        $newHtml = $dom->saveHTML();
+        $newHtml = self::bodyHtml($newHtml);
+
+        return $newHtml;
     }
 
     /**
@@ -239,8 +268,11 @@ class Article
             }
         }
 
-//        return (string)$dom;
-        return $dom->saveHTML();
+
+        $newHtml = $dom->saveHTML();
+        $newHtml = self::bodyHtml($newHtml);
+
+        return $newHtml;
     }
 
     private static function cleanContentTags(string $html)
@@ -249,7 +281,27 @@ class Article
             return '';
         }
 
-        return $html = strip_tags($html, '<a><b><em><i><p><strong><table><tbody><td><thead><th><tr>');
+        $allowableTags = array();
+        $allowableTags[] = '<a>';
+        $allowableTags[] = '<b>';
+        $allowableTags[] = '<br>';
+        $allowableTags[] = '<em>';
+        $allowableTags[] = '<h2>';
+        $allowableTags[] = '<h3>';
+        $allowableTags[] = '<h4>';
+        $allowableTags[] = '<h5>';
+        $allowableTags[] = '<h6>';
+        $allowableTags[] = '<i>';
+        $allowableTags[] = '<p>';
+        $allowableTags[] = '<strong>';
+        $allowableTags[] = '<table>';
+        $allowableTags[] = '<tbody>';
+        $allowableTags[] = '<td>';
+        $allowableTags[] = '<thead>';
+        $allowableTags[] = '<th>';
+        $allowableTags[] = '<tr>';
+
+        return $html = strip_tags($html, implode('', $allowableTags));
     }
 
     /**
@@ -280,7 +332,10 @@ class Article
 
         }
 
-        return $dom->saveHTML();
+        $newHtml = $dom->saveHTML();
+        $newHtml = self::bodyHtml($newHtml);
+
+        return $newHtml;
     }
 
     private static function removeUselessATags($html)
@@ -293,7 +348,7 @@ class Article
         foreach ($els as $el) {
 
             if (0 === count(iterator_to_array($el->attributes))) {
-                self::changeTagName($el, 'deleteme');
+                self::changeTagName($el, 'delete_me');
             }
 
         }
