@@ -342,15 +342,13 @@ class Article
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($html, LIBXML_COMPACT);
-        $els = $dom->getElementsByTagName('a');
+        $nodeList = $dom->getElementsByTagName('a');
 
-        /** @var \DOMElement $el */
-        foreach ($els as $el) {
-
+        for ($i = $nodeList->length - 1; 0 <= $i; $i--) {
+            $el = $nodeList->item($i);
             if (0 === count(iterator_to_array($el->attributes))) {
                 self::changeTagName($el, 'delete_me');
             }
-
         }
 
         $html = $dom->saveHTML();
