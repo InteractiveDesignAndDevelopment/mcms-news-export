@@ -730,11 +730,25 @@ class Article
     {
         $imageUrls = array();
 
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicoly-cadams.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/ne-rage.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolson-forge.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolick-stage.jpg';
-        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/nicolfer-cagily.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DJI_0003.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DJI_0036.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DJI_0049.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DJI_0060.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DJI_0310.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DSC_7697.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DSC_7716.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DSC_7722.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DSC_8550.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/DSC_9141.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT4582.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT4596.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT4751.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT5589.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT7896.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT7907.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MATT7945.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MER_7373.jpg';
+        $imageUrls[] = 'https://assets.mercer.edu/news-import-stock-images/MER_8635.jpg';
 
         return $imageUrls[array_rand($imageUrls)];
 
