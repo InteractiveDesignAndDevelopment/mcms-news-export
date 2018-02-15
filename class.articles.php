@@ -109,6 +109,8 @@ class Articles
 --                   '1E8658D4-8973-4DA8-AFEA-0AFD0303E30E',
 --                   -- Headings: h2
 --                   '9E255CDF-8C1C-4587-BB48-B60D9ADF886C'
+--                   -- Useless a tags
+--                   'DA300A4E-BCA0-4C11-9750-F0821C38983E'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
