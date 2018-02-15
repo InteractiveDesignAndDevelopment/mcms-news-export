@@ -88,7 +88,7 @@ class Articles
 --                   'A0926DFA-79A7-47C2-BA74-513B1E36D205',
 --                   -- Title has misplaced interrogation point
 --                   '4EAB1913-530A-4CF7-8621-83C0403AC0C8',
---                   -- Body has wrong e aigu accent
+--                   -- Body has wrong e accent aigu
 --                   '6AC60A98-9757-416F-B354-BC93610372D0',
 --                   -- Um... lots
 --                   'A9A8E3C5-9D9F-4320-A1B7-AF7ADBA9B3F3',
@@ -96,13 +96,19 @@ class Articles
 --                   'DB5DD77F-B34F-4630-B4FF-2101D32FFBDC',
 --                   -- p tag with extraneous attributes
 --                   '005C9A2D-47F5-4AC8-B7D3-773D6947C273',
---                   -- Facutly & Staff Notables
+--                   -- Faculty & Staff Notables
 --                   'ECC31E65-FB9E-4571-9EA4-2FFAD1B573D1',
 --                   '81DBDD7A-BFA2-4593-BD83-C100C5D9600A',
 --                   '88FA331A-6E75-44DB-83E8-312ED47F031A',
 --                   '9A1B4383-DA2D-4013-ABB0-6AB5DCF3A7B1',
 --                   -- HTML entity in title and styling
 --                   'DDA02377-690E-4523-9A8D-1F63A1C3D438'
+--                   -- Break tags in content
+--                   '0225977B-AF71-48FE-9AD8-E256AF4F4B8F',
+--                   -- Headings: h1
+--                   '1E8658D4-8973-4DA8-AFEA-0AFD0303E30E',
+--                   -- Headings: h2
+--                   '9E255CDF-8C1C-4587-BB48-B60D9ADF886C'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
