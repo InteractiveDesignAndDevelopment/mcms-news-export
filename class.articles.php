@@ -111,6 +111,10 @@ class Articles
 --                   '9E255CDF-8C1C-4587-BB48-B60D9ADF886C'
 --                   -- Useless a tags
 --                   'DA300A4E-BCA0-4C11-9750-F0821C38983E'
+--                   -- Title has XML: `<?xml:namespace`
+--                   '3188C179-FC8A-4A51-AF23-73DC1C4C22A8',
+--                   -- Title has XML comment: `<!--StartFragment -->`
+--                   '6ADD3FFE-9F18-46A1-B4D3-A48C75FC7FAD'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
