@@ -95,9 +95,13 @@ class Article
         $this->setMcmsGuid($details['guid']);
 
         // Title
-        $this->setTitleOriginal($details['placeholders']['PH_headline']['text']);
+        $this->setTitleOriginal($details['placeholders']['PH_headline']['html']);
         $title = $this->getTitleOriginal();
+        $title = strip_tags($title);
+        $title = htmlentities($title, ENT_QUOTES, 'UTF-8');
         $title = iconv('UTF-8', 'ASCII//TRANSLIT', $title);
+        $title = self::removeNbsp($title);
+        $title = trim($title);
         $title = trim($title);
         $this->setTitle($title);
 
@@ -171,6 +175,16 @@ class Article
      *
      * @return string
      */
+    private static function removeNbsp($html)
+    {
+        return str_replace('&nbsp;', '', $html);
+    }
+
+    /**
+     * @param string $html
+     *
+     * @return string
+     */
     private static function convertDivTagsToPTags($html)
     {
         $dom = new DOMDocument;
@@ -203,7 +217,7 @@ class Article
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($html, LIBXML_COMPACT);
-        $nodeList   = $dom->getElementsByTagName($oldTagName);
+        $nodeList = $dom->getElementsByTagName($oldTagName);
 
 //        echo '<pre>';
 //        print_r($nodeListDiv);
@@ -245,6 +259,19 @@ class Article
         return $newNode;
     }
 
+    private static function bodyHtml($html)
+    {
+        $start = strpos($html, '<body>');
+        if (false === $start) {
+            return $html;
+        } else {
+            $start += 6;
+        }
+        $length = (strrpos($html, '</body>')) - strlen($html);
+
+        return substr($html, $start, $length);
+    }
+
     /**
      * This function is not the same as the drop-empty-paras option in Tidy
      * This takes into account whitespace.
@@ -281,7 +308,7 @@ class Article
             return '';
         }
 
-        $allowableTags = array();
+        $allowableTags   = array();
         $allowableTags[] = '<a>';
         $allowableTags[] = '<b>';
         $allowableTags[] = '<br>';
@@ -357,19 +384,6 @@ class Article
 
         return $html;
 
-    }
-
-    private static function bodyHtml($html)
-    {
-        $start = strpos($html, '<body>');
-        if (false === $start) {
-            return $html;
-        } else {
-            $start += 6;
-        }
-        $length = (strrpos($html, '</body>')) - strlen($html);
-
-        return substr($html, $start, $length);
     }
 
     /**
