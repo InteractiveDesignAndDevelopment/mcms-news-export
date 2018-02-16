@@ -117,6 +117,8 @@ class Articles
 --                   '6ADD3FFE-9F18-46A1-B4D3-A48C75FC7FAD'
 --                   -- Double html entity encoding in title and external images
 --                   '036BE678-382D-4CE3-8CB9-03CD80C1E3B4'
+--                   -- Spacer GIF
+--                   '95CCDB39-DD2E-411F-A27D-0A52DF98C6CA'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
