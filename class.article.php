@@ -740,7 +740,13 @@ class Article
         /** @var \DOMElement $element */
         foreach ($imgTags as $element) {
             $src         = $element->getattribute('src');
-            $imageUrls[] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
+            if (0 === strpos($src, 'http://') ||
+                0 === strpos($src, 'https://') ||
+                0 === strpos($src, '//')) {
+                $imageUrls[] = "http://archive.mercer.edu/www2/www2.mercer.edu{$src}\n";
+            } else {
+                $imageUrls[] = $src;
+            }
         }
 
         if (0 === count($imageUrls)) {
