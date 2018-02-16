@@ -37,6 +37,13 @@ foreach ($articles->find()->toArray() as $article)
 {
     echo '<div class="article">';
 
+    // Title (Original)
+    $code = $article->getTitleOriginal();
+    echo '<div class="article__field article__field--raw">';
+    echo '<div class="article__field-label">Title</div>';
+    echo "<div class='article__field-value'><pre><code>$code</code></pre></div>";
+    echo '</div>';
+
     // Title
     $code = $article->getTitle();
     echo '<div class="article__field">';
