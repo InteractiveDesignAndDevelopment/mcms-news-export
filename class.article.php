@@ -97,11 +97,12 @@ class Article
         // Title
         $this->setTitleOriginal($details['placeholders']['PH_headline']['html']);
         $title = $this->getTitleOriginal();
+        $title = html_entity_decode($title);
         $title = strip_tags($title);
+        $title = self::allSpacesToSingleSpace($title);
         $title = htmlentities($title, ENT_QUOTES, 'UTF-8');
         $title = iconv('UTF-8', 'ASCII//TRANSLIT', $title);
         $title = self::removeNbsp($title);
-        $title = trim($title);
         $title = trim($title);
         $this->setTitle($title);
 
@@ -168,6 +169,21 @@ class Article
     public function setTitleOriginal(string $titleOriginal): void
     {
         $this->titleOriginal = $titleOriginal;
+    }
+
+    /**
+     * This isn't exhaustive.
+     *
+     * @param string $corpus
+     *
+     * @return string
+     */
+    private static function allSpacesToSingleSpace($corpus)
+    {
+        $pattern = '/(?:&nbsp;|[\s\p{Z}\p{C}\x85\xA0\x{0085}\x{00A0}\x{FFFD}]+)+/u';
+        $corpus  = preg_replace($pattern, ' ', $corpus);
+
+        return $corpus;
     }
 
     /**
