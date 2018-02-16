@@ -115,6 +115,8 @@ class Articles
 --                   '3188C179-FC8A-4A51-AF23-73DC1C4C22A8',
 --                   -- Title has XML comment: `<!--StartFragment -->`
 --                   '6ADD3FFE-9F18-46A1-B4D3-A48C75FC7FAD'
+                  -- Double html entity encoding in title
+--                   '036BE678-382D-4CE3-8CB9-03CD80C1E3B4'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
