@@ -119,6 +119,7 @@ class Article
         $content = self::cleanContentAttributes($content);
         // Some a tags only had a name attribute and it was removed
         $content = self::removeUselessATags($content);
+        $content = self::removeUselessTableTags($content);
         $content = self::bodyHtml($content);
         $this->setContent($content);
 
@@ -347,12 +348,16 @@ class Article
         return $html = strip_tags($html, implode('', $allowableTags));
     }
 
+    /*
+     * This is a terrible and I'm ashamed of doing this
+     */
+
     /**
      * @param string $html
      *
      * @return string
      */
-    private static function cleanContentAttributes(string $html)
+    private static function cleanContentAttributes(string $html): string
     {
         $dom = new DOMDocument;
         @$dom->loadHTML($html, LIBXML_COMPACT);
@@ -362,8 +367,13 @@ class Article
 
             $attributesToRemove = array();
 
+            /** @var \DOMAttr $attr */
             foreach ($el->attributes as $attr) {
-                if ( ! ('a' == $el->tagName && 'href' == $attr->nodeName)) {
+                if ( ! (('a' == $el->tagName && 'href' == $attr->nodeName) ||
+                    ('td' == $el->tagName && 'colspan' == $attr->nodeName) ||
+                    ('td' == $el->tagName && 'rowspan' == $attr->nodeName) ||
+                    ('th' == $el->tagName && 'colspan' == $attr->nodeName) ||
+                    ('th' == $el->tagName && 'rowspan' == $attr->nodeName)) ) {
                     $attributesToRemove[] = $attr;
                 }
             }
@@ -396,10 +406,81 @@ class Article
 
         $html = $dom->saveHTML();
         $html = self::cleanContentTags($html);
+
         $html = self::bodyHtml($html);
 
         return $html;
 
+    }
+
+    /**
+     * I think this cleans content copy+pasted from another webpage
+     * This maybe some of the worst code in my career
+     *
+     * @param string $htmlFragment
+     *
+     * @return string
+     */
+    private static function removeUselessTableTags(string $htmlFragment): string
+    {
+        $dom = new DOMDocument;
+        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
+        $body = $dom->getElementsByTagName('body')->item(0);
+        $children = $body->childNodes;
+        $hasRootTable = false;
+        $isWrappedInATable = false;
+//        print_r($children);
+        /** @var \DOMElement $item */
+        foreach ($children as $item) {
+//            print('<pre><code>');
+//            print_r($item);
+//            print('</code></pre>');
+            if ('table' == $item->tagName) {
+                $hasRootTable = true;
+            }
+        }
+        if ($hasRootTable) {
+            $isWrappedInATable = true;
+            foreach ($children as $item) {
+                if ('table' != $item->tagName && strlen(trim($item->textContent))) {
+                    $isWrappedInATable = false;
+                }
+            }
+        }
+        if ($isWrappedInATable) {
+            $htmlFragment = self::cleanAllTableTags($htmlFragment);
+        }
+        return $htmlFragment;
+    }
+
+    /**
+     * This code is shameful
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private static function cleanAllTableTags(string $html): string
+    {
+        if (0 == strlen(trim($html))) {
+            return '';
+        }
+
+        $allowableTags   = array();
+        $allowableTags[] = '<a>';
+        $allowableTags[] = '<b>';
+        $allowableTags[] = '<br>';
+        $allowableTags[] = '<em>';
+        $allowableTags[] = '<h2>';
+        $allowableTags[] = '<h3>';
+        $allowableTags[] = '<h4>';
+        $allowableTags[] = '<h5>';
+        $allowableTags[] = '<h6>';
+        $allowableTags[] = '<i>';
+        $allowableTags[] = '<p>';
+        $allowableTags[] = '<strong>';
+
+        return $html = strip_tags($html, implode('', $allowableTags));
     }
 
     /**
@@ -763,7 +844,7 @@ class Article
      * Matt should provide some real images
      * Until then...
      */
-    private static function getRandomStockImage()
+    private static function getRandomStockImage(): string
     {
         $imageUrls = array();
 

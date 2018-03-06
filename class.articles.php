@@ -119,6 +119,8 @@ class Articles
 --                   '036BE678-382D-4CE3-8CB9-03CD80C1E3B4'
 --                   -- Spacer GIF
 --                   '95CCDB39-DD2E-411F-A27D-0A52DF98C6CA'
+--                     -- Article wrapped in table
+--                     'A5A47606-F4C9-4453-B6DD-798317BEBF00'
 --                   )
 -- End specific problems =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
          ORDER BY posting_name ASC
