@@ -119,7 +119,7 @@ class Article
         $content = self::cleanContentAttributes($content);
         // Some a tags only had a name attribute and it was removed
         $content = self::removeUselessATags($content);
-        $content = self::removeUselessTableTags($content);
+//        $content = self::removeUselessTableTags($content);
         $content = self::bodyHtml($content);
         $this->setContent($content);
 
@@ -421,37 +421,71 @@ class Article
      *
      * @return string
      */
-    private static function removeUselessTableTags(string $htmlFragment): string
-    {
-        $dom = new DOMDocument;
-        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
-        $body = $dom->getElementsByTagName('body')->item(0);
-        $children = $body->childNodes;
-        $hasRootTable = false;
-        $isWrappedInATable = false;
-//        print_r($children);
-        /** @var \DOMElement $item */
-        foreach ($children as $item) {
-//            print('<pre><code>');
-//            print_r($item);
-//            print('</code></pre>');
-            if ('table' == $item->tagName) {
-                $hasRootTable = true;
-            }
-        }
-        if ($hasRootTable) {
-            $isWrappedInATable = true;
-            foreach ($children as $item) {
-                if ('table' != $item->tagName && strlen(trim($item->textContent))) {
-                    $isWrappedInATable = false;
-                }
-            }
-        }
-        if ($isWrappedInATable) {
-            $htmlFragment = self::cleanAllTableTags($htmlFragment);
-        }
-        return $htmlFragment;
-    }
+//    private static function removeUselessTableTags(string $htmlFragment): string
+//    {
+//        $dom = new DOMDocument;
+//        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
+//        $body = $dom->getElementsByTagName('body')->item(0);
+//        $children = $body->childNodes;
+//        $hasRootTable = false;
+//        $isWrappedInATable = false;
+////        print_r($children);
+//        /** @var \DOMElement $item */
+//        foreach ($children as $item) {
+////            print('<pre><code>');
+////            print_r($item);
+////            print('</code></pre>');
+//            if ('table' == $item->tagName) {
+//                $hasRootTable = true;
+//            }
+//        }
+//        if ($hasRootTable) {
+//            $isWrappedInATable = true;
+//            foreach ($children as $item) {
+//                if ('table' != $item->tagName && strlen(trim($item->textContent))) {
+//                    $isWrappedInATable = false;
+//                }
+//            }
+//        }
+//        if ($isWrappedInATable) {
+//            $htmlFragment = self::cleanAllTableTags($htmlFragment);
+//        }
+//        return $htmlFragment;
+//    }
+
+    /**
+     * @param string $html
+     *
+     * @return string
+     */
+//    private static function removeUselessPTags(string $html): string
+//    {
+//        $dom = new DOMDocument;
+//        @$dom->loadHTML($htmlFragment, LIBXML_COMPACT);
+//        $tds = $dom->getElementsByTagName('td');
+//        $ths = $dom->getElementsByTagName('th');
+//        /** @var \DOMElement $td */
+//        foreach ($tds as $td) {
+//            $reduceToText = false;
+//            /** @var \DOMElement $n */
+//            foreach ($td->childNodes as $child_node) {
+//                if ('p' == strtolower($child_node->nodeName)) {
+//                    $reduceToText = true;
+//                }
+//            }
+//            foreach ($td->childNodes as $child_node) {
+//                if ('p' != strtolower($child_node->nodeName) && strlen(trim($child_node->textContent))) {
+//                    $reduceToText = false;
+//                }
+//            }
+//            if ($reduceToText) {
+//                ;
+//            }
+//        }
+//        foreach ($ths as $th) {
+//
+//        }
+//    }
 
     /**
      * This code is shameful
@@ -482,6 +516,19 @@ class Article
 
         return $html = strip_tags($html, implode('', $allowableTags));
     }
+
+    /**
+     * @param \DOMNode $from
+     */
+//    private static function DOMRemove($from): void
+//    {
+//        $sibling = $from->firstChild;
+//        do {
+//            $next = $sibling->nextSibling;
+//            $from->parentNode->insertBefore($sibling, $from);
+//        } while ($sibling = $next);
+//        $from->parentNode->removeChild($from);
+//    }
 
     /**
      * @return string
@@ -841,8 +888,7 @@ class Article
     }
 
     /**
-     * Matt should provide some real images
-     * Until then...
+     * Matt picked these images
      */
     private static function getRandomStockImage(): string
     {
